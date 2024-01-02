@@ -1,0 +1,44 @@
+{% extends "photoroll/base.html" %}
+{% load thumbnail %}
+
+{% block customcss %}
+<style>
+img.block-shadow {
+    transition: opacity 300ms ease-in;
+    filter: gray; /* IE6-9 */
+    -webkit-filter: grayscale(100%); /* Chrome 19+ & Safari 6+ */
+}
+img.block-shadow:hover{
+    filter: none;
+    -webkit-filter: grayscale(0%);
+    box-shadow:
+    1px 1px #373737,
+    2px 2px #373737,
+    3px 3px #373737,
+    4px 4px #373737,
+    5px 5px #373737,
+    6px 6px #373737;
+    -webkit-transform: translateX(-3px);
+    transform: translateX(-3px);
+    transition: .25s ease;
+}
+</style>
+{% endblock customcss %}
+
+{% block content %}
+
+<div class="row d-flex flex-wrap">
+{% for post in object_list %}
+    <div class="col d-flex justify-content-evenly justify-content-xxl-start my-3">
+        <div>
+            <a href="{% url 'post_detail' post.id %}">
+                {% thumbnail post.machine.img "300x300" crop="center" as im %}
+                    <img src="{{ im.url }}" class="rounded block-shadow" width="{{ im.width }}" height="{{ im.height }}">
+                {% endthumbnail %}
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}

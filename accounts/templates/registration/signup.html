@@ -1,0 +1,15 @@
+{% extends "photoroll/base.html" %}
+{% load django_bootstrap5 %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-6 offset-lg-3">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <input type="submit" value="Sign Up"/>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}

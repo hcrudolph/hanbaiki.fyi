@@ -1,0 +1,129 @@
+{% extends "photoroll/base.html" %}
+
+{% block customcss %}
+<style>
+ul {
+    margin: 0;
+    padding: 0;
+}
+ul.geo-info > li {
+    list-style-type: none;
+}
+div.geo-info {
+    background-color: #eee;
+}
+.post-image {
+    max-height: 600px;
+}
+</style>
+{% endblock customcss %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Post #{{ post.id }}</a></li>
+            </ol>
+          </nav>
+    </div>
+</div>
+<div class="row d-flex flex-wrap">
+    <div class="col-lg-6 d-flex justify-content-center my-2">
+        <img class="img-fluid post-image" src="{{ post.machine.img.url }}"/>
+    </div>
+    <div class="col-lg-6 p-4 border my-2 flex-fill geo-info">
+            <div class="row">
+                <div class="col-6">
+                    <p class="fw-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-map-fill" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"/>
+                            <path fill-rule="evenodd" d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999z"/>
+                        </svg>
+                        Geo information
+                    </p>
+                </div>
+                <div class="col-6">
+                    <p class="fw-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags-fill" viewBox="0 0 16 16">
+                            <path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+                            <path d="M1.293 7.793A1 1 0 0 1 1 7.086V2a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l.043-.043-7.457-7.457z"/>
+                        </svg>
+                        Tags
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <ul class="geo-info">
+                        <li>Latitude:</li>
+                        <li>Longitude:</li>
+                        <li>State:</li>
+                        <li>Postcode:</li>
+                        <li>City:</li>
+                        <li>Town:</li>
+                        <li>Map view:</li>
+                    </ul>
+                </div>
+                <div class="col-3">
+                    <ul class="geo-info">
+                        <li>
+                            {% if post.machine.lat %}
+                            {{ post.machine.lat }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if post.machine.lat %}
+                            {{ post.machine.lon }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if post.machine.state %}
+                            {{ post.machine.state }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if post.machine.postcode %}
+                            <a href="{% url 'filter_postcode' post.machine.postcode %}">{{ post.machine.postcode }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if post.machine.city %}
+                            <a href="{% url 'filter_city' post.machine.city %}">{{ post.machine.city }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if post.machine.town %}
+                            {{ post.machine.town }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </li>
+                        <li>
+                            <a href="{% url 'post_map' post.id %}">
+                                Link
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-6">
+                    {% for tag in post.tags.all %}
+                    <a href="{% url 'tag_detail' tag.slug %}"><span class="badge rounded-pill bg-primary text-bg-primary">{{ tag.name }}</span></a>
+                    {% endfor %}
+                </div>
+            </div>
+    </div>
+</div>
+
+{% endblock content %}

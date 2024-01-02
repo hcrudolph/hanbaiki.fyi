@@ -1,0 +1,57 @@
+{% load base_path %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-5">
+    <div class="container">
+        <a class="navbar-brand" href="/">Vending Machines of Japan</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a href="/" class="nav-link {% if request.path|base_path == '' %}active{% endif %}">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.path|base_path == 'filter' %}active{% endif %}" href="#" id="navbarDropdownFilter" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Filter by
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownFilter">
+                        <li><a class="dropdown-item" href="#">City</a></li>
+                        <li><a class="dropdown-item" href="#">Postcode</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'tag_list' %}" class="nav-link {% if request.path|base_path == 'tags' %}active{% endif %}">Tags</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'archive' %}" class="nav-link {% if request.path|base_path == 'archive' %}active{% endif %}">Archive</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a href="{% url 'upload' %}" class="nav-link {% if request.path|base_path == 'upload' %}active{% endif %}">Upload</a>
+                </li>
+                {% endif %}
+            </ul>
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            {% else %}
+            <a href="{% url 'login' %}" type="button" class="btn btn-primary mx-2">Log In</a>
+            <a href="{% url 'signup' %}" type="button" class="btn btn-outline-primary mx-2">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+  </nav>

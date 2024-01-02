@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "photoroll/head.html" %}
+    <style>
+        body {
+            margin-bottom: 50px;
+        }
+    </style>
+    {% block customcss %}{% endblock customcss %}
+</head>
+<body>
+    {% include "photoroll/navbar.html" %}
+    <main class="container">
+        {% if messages %}
+        <div class="row messages">
+        {% for message in messages %}
+        <div {% if message.tags %} role="alert" class="alert alert-{{ message.tags }} alert-dismissible fade show"{% endif %}>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock content %}
+        {% block pagination %}
+        {% if is_paginated %}
+        <div class="pagination justify-content-center mt-5">
+            <nav aria-label="Pagination">
+                <ul class="pagination pagination-lg">
+                <!-- First and previous links -->
+                {% if page_obj.has_previous %}
+                <li class="page-item first">
+                    <a class="page-link" href="{{ request.path }}?page=1">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a></li>
+                    <li class="page-item previous">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
+                        <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
+                    </a></li>
+                {% else %}
+                    <li class="page-item first disabled">
+                        <a class="page-link" href="#">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a></li>
+                    <li class="page-item previous disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&lsaquo;</span>
+                    </a></li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <a class="page-link" href="#">{{ page_obj.number }}</a>
+                </li>
+
+                <!-- Next and last links -->
+                {% if page_obj.has_next %}
+                    <li class="page-item next">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                        <span aria-hidden="true">{{ page_obj.next_page_number }}</span>
+                    </a></li>
+                    <li class="page-item last">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.paginator.num_pages }}">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a></li>
+                {% else %}
+                    <li class="page-item next disabled">
+                        <a class="page-link" href="#">
+                        <span aria-hidden="true">&rsaquo;</span>
+                    </a></li>
+                    <li class="page-item last disabled">
+                        <a class="page-link" href="#">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a></li>
+                {% endif %}
+
+                </ul>
+            </nav>
+        </div><!-- end pagination -->
+        {% endif %}
+        {% endblock %}
+    </main>
+    {% include "photoroll/footer.html" %}
+    {% include "photoroll/js.html" %}
+    {% block customjs %}{% endblock customjs %}
+</body>
+</html>

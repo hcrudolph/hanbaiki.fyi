@@ -1,0 +1,15 @@
+{% extends "photoroll/base.html" %}
+{% load thumbnail %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <ul>
+        {% for year in years %}
+            <li><a href="{% url 'archive_year' year %}">{{ year }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock content %}

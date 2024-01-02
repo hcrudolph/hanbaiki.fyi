@@ -1,0 +1,18 @@
+{% extends "photoroll/base.html" %}
+{% load django_bootstrap5 %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-6 offset-lg-3 my-3">
+        <div class="alert alert-warning" role="alert">
+            <span class="fw-bold">Please note:</span> Uploaded images will be automatically analyzed for GPS Information. Avoid uploading any sensitive information that you don't want to share publicly.
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% bootstrap_button button_type="submit" content="Upload" %}
+        </form>
+    </div>
+</div>
+
+{% endblock content %}

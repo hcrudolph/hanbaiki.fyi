@@ -1,0 +1,14 @@
+{% extends "photoroll/base.html" %}
+{% load thumbnail %}
+
+{% block content %}
+
+<ul>
+{% for tag in object_list %}
+    <li><a href="{% url 'tag_detail' tag.slug %}">{{ tag.name }}</a></li>
+{% empty %}
+    <li>No tags yet.</li>
+{% endfor %}
+</ul>
+
+{% endblock content %}
