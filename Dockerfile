@@ -4,15 +4,13 @@ ENV DJANGO_SUPERUSER_PASSWORD
 ENV DJANGO_SUPERUSER_EMAIL
 ENV DJANGO_SECRET_KEY
 
-RUN --mount=type=secret,id=aws,target=/root/.aws/credentials \
-
 WORKDIR /app
 
 COPY . .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements/requirements.txt
 RUN python3 manage.py makemigrations && python3 manage.py migrate
-RUN python3 manage.py createsuperuser --noinput
+RUN python3 manage.py createsuperuser --noinput --email DJANGO_SUPERUSER_EMAIL
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "hanbaiki_fyi.wsgi:application"]
+CMD ["gunicorn", "--bind", ":8000", "hanbaiki_fyi.wsgi:application"]
