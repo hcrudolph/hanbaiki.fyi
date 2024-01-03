@@ -29,7 +29,7 @@ img.block-shadow:hover{
 
 <div class="row d-flex flex-wrap">
 {% for post in object_list %}
-    <div class="col d-flex justify-content-evenly justify-content-xxl-start my-3">
+    <div class="col-4 d-flex justify-content-evenly justify-content-xxl-start my-3">
         <div>
             <a href="{% url 'post_detail' post.id %}">
                 {% thumbnail post.machine.img "300x300" crop="center" as im %}
