@@ -59,8 +59,7 @@ div.geo-info {
                     <ul class="geo-info">
                         <li>Latitude:</li>
                         <li>Longitude:</li>
-                        <li>State:</li>
-                        <li>Postcode:</li>
+                        <li>Zip Code:</li>
                         <li>City:</li>
                         <li>Town:</li>
                         <li>Map view:</li>
@@ -83,22 +82,15 @@ div.geo-info {
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.state %}
-                            {{ post.machine.state }}
+                            {% if post.machine.zip is not None %}
+                            <a href="{% url 'post_by_zip' post.machine.zip.slug %}">{{ post.machine.zip.code }}</a>
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.postcode %}
-                            <a href="{% url 'filter_postcode' post.machine.postcode %}">{{ post.machine.postcode }}</a>
-                            {% else %}
-                            -
-                            {% endif %}
-                        </li>
-                        <li>
-                            {% if post.machine.city %}
-                            <a href="{% url 'filter_city' post.machine.city %}">{{ post.machine.city }}</a>
+                            {% if post.machine.city is not None %}
+                            <a href="{% url 'post_by_city' post.machine.city.slug %}">{{ post.machine.city.name }}</a>
                             {% else %}
                             -
                             {% endif %}

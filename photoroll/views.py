@@ -63,6 +63,14 @@ def archive(request):
     }
     return render(request, 'photoroll/archive.html', context)
 
+class CityListView(generic.ListView):
+    model = City
+    template_name = 'photoroll/city_list.html'
+
+class ZipListView(generic.ListView):
+    model = ZipCode
+    template_name = 'photoroll/zip_list.html'
+
 class TagListView(generic.ListView):
     model = Tag
     template_name = 'photoroll/tag_list.html'
@@ -107,7 +115,7 @@ class PostByCityListView(generic.ListView):
     def get_queryset(self):
         return Post.objects.filter(
             is_published=True,
-            machine__city=self.kwargs['city'],
+            machine__city__slug=self.kwargs['city'],
         )
 
 class PostByZipListView(generic.ListView):
@@ -118,7 +126,7 @@ class PostByZipListView(generic.ListView):
     def get_queryset(self):
         return Post.objects.filter(
             is_published=True,
-            machine__postcode=self.kwargs['zip'],
+            machine__zip__slug=self.kwargs['zip'],
         )
 
 ######################

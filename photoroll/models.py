@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.utils.html import mark_safe
 from django.dispatch import receiver
@@ -31,7 +32,7 @@ def get_geo_info(lat: float, lon: float, lang="en") -> str:
     try:
         result['country'] = response['address']['country']
     except KeyError:
-        result['country'] = ''
+        result['country'] = None
         logging.warning(f"No 'country' found for location LAT:{lat} LON:{lon}")
 
     # try to get state/county information
@@ -42,21 +43,21 @@ def get_geo_info(lat: float, lon: float, lang="en") -> str:
         try:
             result['state'] = response['address']['county']
         except KeyError:
-            result['state'] = ''
+            result['state'] = None
             logging.warning(f"No 'county' found for location LAT:{lat} LON:{lon}")
 
     # try to get postcode information
     try:
         result['postcode'] = response['address']['postcode']
     except KeyError:
-        result['postcode'] = ''
+        result['postcode'] = None
         logging.warning(f"No 'postcode' found for location LAT:{lat} LON:{lon}")
 
     # try to get postcode information
     try:
         result['city'] = response['address']['city']
     except KeyError:
-        result['city'] = ''
+        result['city'] = None
         logging.warning(f"No 'city' found for location LAT:{lat} LON:{lon}")
 
     # try to get town/village/neighborhood information
@@ -71,13 +72,49 @@ def get_geo_info(lat: float, lon: float, lang="en") -> str:
             try:
                 result['town'] = response['address']['neighborhood']
             except KeyError:
-                result['town'] = ''
+                result['town'] = None
                 logging.warning(f"No 'neighborhood' found for location LAT:{lat} LON:{lon}")
 
     return result
 
+def machine_post_processing(instance):
+    geo_info = get_geo_info(instance.lat, instance.lon)
+    if geo_info['country'] is not None:
+        instance.country, _ = Country.objects.get_or_create(
+            name=geo_info['country']
+        )
+    else:
+        instance.country = None
+    if geo_info['state'] is not None:
+        instance.state, _ = State.objects.get_or_create(
+            name=geo_info['state']
+        )
+    else:
+        instance.state = None
+    if geo_info['postcode'] is not None:
+        instance.zip, _ = ZipCode.objects.get_or_create(
+            code=geo_info['postcode']
+        )
+    else:
+        instance.zip = None
+    if geo_info['city'] is not None:
+        instance.city, _ = City.objects.get_or_create(
+            name=geo_info['city']
+        )
+    else:
+        instance.city = None
+    if geo_info['town'] is not None:
+        instance.town, _ = Town.objects.get_or_create(
+            name=geo_info['town']
+        )
+    else:
+        instance.town = None
+    instance.save()
+    Post.objects.create(machine=instance)
+
 def get_sentinel_user():
-    return settings.AUTH_USER_MODEL.objects.get_or_create(username="deleted")[0]
+    User = get_user_model()
+    return User.objects.get_or_create(username="deleted")[0]
 
 ######################
 # Model definitions  #
@@ -110,30 +147,35 @@ class VendingMachine(models.Model):
         max_digits=9,
         decimal_places=6,
     )
-    country = models.CharField(
+    country = models.ForeignKey(
+        'Country',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        max_length=50,
     )
-    state = models.CharField(
+    state = models.ForeignKey(
+        'State',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        max_length=50,
     )
-    postcode = models.CharField(
+    zip = models.ForeignKey(
+        'ZipCode',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        max_length=10,
     )
-    city = models.CharField(
+    city = models.ForeignKey(
+        'City',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        max_length=50,
     )
-    town = models.CharField(
+    town = models.ForeignKey(
+        'Town',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        max_length=50,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -150,7 +192,7 @@ class VendingMachine(models.Model):
 
     img_tag.short_description = 'Image'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"#{self.id} {self.date_created.strftime('%Y/%m/%d')}"
 
 class Post(models.Model):
@@ -163,7 +205,7 @@ class Post(models.Model):
         editable=False,
     )
     machine = models.ForeignKey(
-        "VendingMachine",
+        'VendingMachine',
         on_delete=models.CASCADE,
     )
     tags = models.ManyToManyField(
@@ -198,19 +240,125 @@ class Tag(models.Model):
     def __str__(self) -> str:
         return self.name
 
+class Country(models.Model):
+    class Meta:
+        ordering=['name']
+        verbose_name_plural='Countries'
+
+    name = models.CharField(
+        primary_key=True,
+        max_length=50,
+    )
+    slug = models.SlugField(
+        unique=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+class State(models.Model):
+    class Meta:
+        ordering=['name']
+
+    name = models.CharField(
+        primary_key=True,
+        max_length=50,
+    )
+    slug = models.SlugField(
+        unique=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+class City(models.Model):
+    class Meta:
+        ordering=['name']
+        verbose_name_plural='Cities'
+
+    name = models.CharField(
+        primary_key=True,
+        max_length=50,
+    )
+    slug = models.SlugField(
+        unique=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+class Town(models.Model):
+    class Meta:
+        ordering=['name']
+
+    name = models.CharField(
+        primary_key=True,
+        max_length=50,
+    )
+    slug = models.SlugField(
+        unique=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        return self.name
+
+class ZipCode(models.Model):
+    class Meta:
+        ordering=['code']
+
+    code = models.CharField(
+        primary_key=True,
+        max_length=50,
+    )
+    slug = models.SlugField(
+        unique=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        return self.code
+
+
 ######################
 # Signal definitions #
 ######################
 
 @receiver(pre_save, sender=Post)
 def create_slug(sender, instance, *args, **kwargs):
-    """Automatically generates a slug from the post's title."""
     if not instance.slug:
         instance.slug = slugify_post(instance.machine.img.name)
 
 @receiver(pre_save, sender=Tag)
 def create_slug_from_tag_name(sender, instance, *args, **kwargs):
-    """Automatically generates a slug from the tag's name."""
+    if not instance.slug:
+        instance.slug = slugify(instance.name)
+
+@receiver(pre_save, sender=Country)
+def create_slug_from_country_name(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.name)
+
+@receiver(pre_save, sender=State)
+def create_slug_from_state_name(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.name)
+
+@receiver(pre_save, sender=ZipCode)
+def create_slug_from_zipcode(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.code)
+
+@receiver(pre_save, sender=City)
+def create_slug_from_city_name(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.name)
+
+@receiver(pre_save, sender=Town)
+def create_slug_from_town_name(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = slugify(instance.name)
 
@@ -231,23 +379,13 @@ def read_exif_data(sender, instance, created, **kwargs):
         except KeyError:
             lon_dec=None
 
-        if lat_dec==None or lon_dec==None:
+        if lat_dec==None or lon_dec==None or (lat_dec==0 and lon_dec==0):
             logging.error('Image does not contain GPS Info and will be deleted.')
             instance.delete()
         else:
             instance.lat = lat_dec
             instance.lon = lon_dec
-            geo_info = get_geo_info(lat_dec, lon_dec)
-            instance.country = geo_info['country']
-            instance.state = geo_info['state']
-            instance.postcode = geo_info['postcode']
-            instance.city = geo_info['city']
-            instance.town = geo_info['town']
-            instance.save()
-
-            Post.objects.create(
-                machine=instance,
-            )
+            machine_post_processing(instance)
 
 @receiver(pre_delete, sender=VendingMachine)
 def delete_associated_media(sender, instance, *args, **kwargs):

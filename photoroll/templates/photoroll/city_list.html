@@ -1,0 +1,13 @@
+{% extends "photoroll/base.html" %}
+
+{% block content %}
+
+<ul>
+{% for city in object_list %}
+    <li><a href="{% url 'post_by_city' city.slug %}">{{ city.name }}</a></li>
+{% empty %}
+    <li>No cities yet.</li>
+{% endfor %}
+</ul>
+
+{% endblock content %}
