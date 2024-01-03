@@ -1,10 +1,7 @@
-from django.forms import ModelForm
+from django import forms
 from .models import VendingMachine
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
-class UploadForm(ModelForm):
+class UploadForm(forms.ModelForm):
     class Meta:
         model = VendingMachine
         fields = ["img"]
@@ -12,8 +9,15 @@ class UploadForm(ModelForm):
             "img": "",
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['img'].widget.attrs.update({
+            'class': 'form-control',
+            'type': 'file',
+            'id': 'ImgInput'
+        })
 
-class SignUpForm(ModelForm):
-    class Meta:
-        model = User
-        fields = ["email", "username", "password"]
+    widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'id': 'CaptchaInput'
+    })

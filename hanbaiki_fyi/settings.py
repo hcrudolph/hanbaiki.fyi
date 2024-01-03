@@ -44,8 +44,8 @@ INSTALLED_APPS = [
     'photoroll',
     'accounts',
     'sorl.thumbnail',
-    'django_bootstrap5',
     'storages',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -181,6 +181,10 @@ DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = False
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Captcha
+
+CAPTCHA_LENGTH = 6
 
 # Mapbox API access
 

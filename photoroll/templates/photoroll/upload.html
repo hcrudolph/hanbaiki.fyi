@@ -1,5 +1,4 @@
 {% extends "photoroll/base.html" %}
-{% load django_bootstrap5 %}
 {% block content %}
 
 <div class="row">
@@ -9,8 +8,8 @@
         </div>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% bootstrap_form form %}
-            {% bootstrap_button button_type="submit" content="Upload" %}
+            {{ form.img }}
+            <button type="submit" class="btn btn-primary mt-3">Upload</button>
         </form>
     </div>
 </div>

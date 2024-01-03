@@ -1,13 +1,23 @@
 {% extends "photoroll/base.html" %}
-{% load django_bootstrap5 %}
 {% block content %}
 
-<div class="row">
-    <div class="col-lg-6 offset-lg-3">
-        <form method="post" enctype="multipart/form-data">
+<div class="row d-flex justify-content-md-center justify-content-lg-start">
+    <div class="col-md-6 offset-lg-3">
+        <form method="post">
             {% csrf_token %}
-            {% bootstrap_form form %}
-            <input type="submit" value="Sign Up"/>
+            <label for="EmailInput" class="form-label">Email address</label>
+            {{ form.email }}
+            <label for="UsernameInput" class="form-label mt-3">Username</label>
+            {{ form.username }}
+            <div id="UsernameHelp" class="form-text">{{ form.username.help_text }}</div>
+            <label for="Password1Input" class="form-label mt-3">Password</label>
+            {{ form.password1 }}
+            <div id="PasswordHelp" class="form-text">{{ form.password1.help_text }}</div>
+            <label for="Password2Input" class="form-label">Password confirmation</label>
+            {{ form.password2 }}
+            <label for="CaptchaInput" class="form-label mt-3">Captcha</label>
+            {{ form.captcha }}
+
         </form>
     </div>
 </div>
