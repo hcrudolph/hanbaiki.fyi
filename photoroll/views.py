@@ -11,6 +11,13 @@ from .models import *
 # Global definitions #
 ######################
 
+def gps_dec_to_deg(dec:float):
+    result = dict()
+    result['degree'] = int(dec)
+    result['minute'] = int((dec - result['degree']) * 60)
+    result['second'] = round((((dec - result['degree']) * 60) - result['minute']) * 60, 4)
+    return result
+
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
     "silent": "light",
@@ -35,6 +42,8 @@ def post_detail(request, post_id):
     )
     context = {
         'post': post,
+        'lat_deg': gps_dec_to_deg(post.machine.lat),
+        'lon_deg': gps_dec_to_deg(post.machine.lon),
     }
     return render(request, 'photoroll/post.html', context)
 
