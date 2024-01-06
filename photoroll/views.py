@@ -147,10 +147,16 @@ def upload(request):
     if request.method == "POST":
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
-            vm = form.save(commit=False)
-            vm.created_by = request.user
-            vm = form.save()
-            messages.success(request, "Image uploaded successfully.")
+            images = request.FILES.getlist('img')
+            image_count = 0
+            for image in images:
+                vm = VendingMachine(
+                    img = image,
+                    created_by = request.user
+                )
+                vm.save()
+                image_count+=1
+            messages.success(request, f"{image_count} image(s) uploaded successfully.")
             return HttpResponseRedirect("/")
     else:
         form = UploadForm()

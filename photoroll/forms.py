@@ -14,7 +14,8 @@ class UploadForm(forms.ModelForm):
         self.fields['img'].widget.attrs.update({
             'class': 'form-control',
             'type': 'file',
-            'id': 'ImgInput'
+            'id': 'ImgInput',
+            'multiple': 'True',
         })
 
     widget=forms.TextInput(attrs={
