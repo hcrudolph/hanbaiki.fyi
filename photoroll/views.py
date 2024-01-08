@@ -67,22 +67,25 @@ def post_map(request, post_id):
     return render(request, 'photoroll/map.html', context)
 
 def archive(request):
-    years = dict()
-    earliest_post = Post.objects.earliest()
-    latest_post = Post.objects.latest()
-    earliest_year = earliest_post.date_published.year
-    latest_year = latest_post.date_published.year + 1
-    year_range = range(earliest_year, latest_year)
+    if Post.objects.exists():
+        years = dict()
+        earliest_post = Post.objects.earliest()
+        latest_post = Post.objects.latest()
+        earliest_year = earliest_post.date_published.year
+        latest_year = latest_post.date_published.year + 1
+        year_range = range(earliest_year, latest_year)
 
-    for year in year_range:
-        months = []
-        post_list = Post.objects.filter(date_published__year=year)
-        for post in post_list:
-            months.append(post.date_published.month)
-        years[year] = set(months)
+        for year in year_range:
+            months = []
+            post_list = Post.objects.filter(date_published__year=year)
+            for post in post_list:
+                months.append(post.date_published.month)
+            years[year] = set(months)
+    else:
+        years = None
 
-    cities = City.objects.all()
-    zips = ZipCode.objects.all()
+    cities = City.objects.exclude(vendingmachine=None)
+    zips = ZipCode.objects.exclude(vendingmachine=None)
 
     context = {
         'years': years,
