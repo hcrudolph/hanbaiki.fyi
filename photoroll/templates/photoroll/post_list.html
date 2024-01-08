@@ -1,0 +1,24 @@
+{% extends "photoroll/base.html" %}
+{% load thumbnail %}
+
+{% block content %}
+{% if page_title %}
+<div class="row d-flex">
+    <div class="col-12">
+        <h1>{{ page_title }}</h1>
+    </div>
+</div>
+{% endif %}
+
+<div class="row d-flex flex-wrap">
+{% for post in object_list %}
+    <div class="col-lg-4 d-flex justify-content-evenly my-3">
+        <a href="{% url 'post_detail' post.id %}">
+            {% thumbnail post.machine.img "300x300" crop="center" as im %}
+            <img src="{{ im.url }}" class="rounded block-shadow" width="{{ im.width }}" height="{{ im.height }}">
+            {% endthumbnail %}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

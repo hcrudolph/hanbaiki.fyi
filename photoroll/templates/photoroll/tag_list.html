@@ -1,13 +1,21 @@
 {% extends "photoroll/base.html" %}
 
 {% block content %}
+<div class="row d-flex">
+    <div class="col-12">
+        <h1>Tags</h1>
+    </div>
+</div>
 
-<ul>
-{% for tag in object_list %}
-    <li><a href="{% url 'tag_detail' tag.slug %}">{{ tag.name }}</a></li>
-{% empty %}
-    <li>No tags yet.</li>
-{% endfor %}
-</ul>
-
+<div class="row">
+    <div class="col-md-6">
+        <ul>
+        {% for tag in object_list %}
+            <li><a href="{% url 'posts_by_tag' tag.slug %}">{{ tag.name }}</a></li>
+        {% empty %}
+            <li>No tags yet.</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock content %}

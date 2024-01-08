@@ -1,13 +1,47 @@
 {% extends "photoroll/base.html" %}
-{% block content %}
 
-<div class="row">
+{% block content %}
+<div class="row d-flex">
+    <div class="col-12">
+        <h1>Archive</h1>
+    </div>
+</div>
+
+<div class="row d-flex">
     <div class="col-md-4">
+        <h2>By Date</h2>
         <ul>
-        {% for year in years %}
-            <li><a href="{% url 'archive_year' year %}">{{ year }}</a></li>
+        {% for year, months in years.items %}
+            <li>
+                <a href="{% url 'archive_year' year %}">{{ year }}</a>
+                <ul>
+                    {% for month in months %}
+                    <li><a href="{% url 'archive_month' year month %}">{{ year }}/{{ month }}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
         {% endfor %}
         </ul>
+    </div>
+    <div class="col-md-4 mt-sm-3">
+        <h2>By City</h2>
+        <ul>
+        {% for city in cities %}
+            <li>
+                <a href="{% url 'posts_by_city' city.slug %}">{{ city }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-4 mt-sm-3">
+        <h2>By Zip code</h2>
+        <ul>
+            {% for zip in zips %}
+                <li>
+                    <a href="{% url 'posts_by_zip' zip.slug %}">{{ zip }}</a>
+                </li>
+            {% endfor %}
+            </ul>
     </div>
 </div>
 

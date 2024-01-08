@@ -25,17 +25,21 @@ MESSAGE_TAGS = {
     "silent": "light",
 }
 
+
 ######################
 # View definitions   #
 ######################
 
 class PostListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
 
     def get_queryset(self):
         return Post.objects.filter(is_published=True)
+
+def about(request):
+    return render(request, 'photoroll/about.html')
 
 def post_detail(request, post_id):
     post = get_object_or_404(
@@ -63,33 +67,47 @@ def post_map(request, post_id):
     return render(request, 'photoroll/map.html', context)
 
 def archive(request):
+    years = dict()
     earliest_post = Post.objects.earliest()
     latest_post = Post.objects.latest()
     earliest_year = earliest_post.date_published.year
     latest_year = latest_post.date_published.year + 1
     year_range = range(earliest_year, latest_year)
 
+    for year in year_range:
+        months = []
+        post_list = Post.objects.filter(date_published__year=year)
+        for post in post_list:
+            months.append(post.date_published.month)
+        years[year] = set(months)
+
+    cities = City.objects.all()
+    zips = ZipCode.objects.all()
+
     context = {
-        'years': year_range,
+        'years': years,
+        'cities': cities,
+        'zips': zips,
     }
     return render(request, 'photoroll/archive.html', context)
 
-class CityListView(generic.ListView):
-    model = City
-    template_name = 'photoroll/city_list.html'
-
-class ZipListView(generic.ListView):
-    model = ZipCode
-    template_name = 'photoroll/zip_list.html'
 
 class TagListView(generic.ListView):
     model = Tag
     template_name = 'photoroll/tag_list.html'
 
+    def get_queryset(self):
+        return Tag.objects.exclude(post=None)
+
 class PostsByTagListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Vending machines tagged with '{self.kwargs['slug'].capitalize()}'"
+        return context
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, slug=self.kwargs['slug'])
@@ -97,8 +115,13 @@ class PostsByTagListView(generic.ListView):
 
 class PostByYearListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Vending machines from {self.kwargs['year']}"
+        return context
 
     def get_queryset(self):
         return Post.objects.filter(
@@ -108,8 +131,13 @@ class PostByYearListView(generic.ListView):
 
 class PostByMonthListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Vending machines from {self.kwargs['year']}/{self.kwargs['month']}"
+        return context
 
     def get_queryset(self):
         return Post.objects.filter(
@@ -120,8 +148,13 @@ class PostByMonthListView(generic.ListView):
 
 class PostByCityListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Vending machines in {self.kwargs['city'].capitalize()}"
+        return context
 
     def get_queryset(self):
         return Post.objects.filter(
@@ -131,8 +164,13 @@ class PostByCityListView(generic.ListView):
 
 class PostByZipListView(generic.ListView):
     model = Post
-    template_name = 'photoroll/index.html'
-    paginate_by = 9
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Vending machines in {self.kwargs['zip']}"
+        return context
 
     def get_queryset(self):
         return Post.objects.filter(

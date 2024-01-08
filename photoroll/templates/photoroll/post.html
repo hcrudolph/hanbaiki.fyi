@@ -6,7 +6,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Post #{{ post.id }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Post</a></li>
             </ol>
           </nav>
     </div>
@@ -15,9 +15,9 @@
     <div class="col-lg-6 d-flex justify-content-center my-2">
         <img class="img-fluid post-image" src="{{ post.machine.img.url }}"/>
     </div>
-    <div class="col-lg-6 p-4 border my-2 flex-fill geo-info">
+    <div class="col-lg-6 border p-4 my-2 flex-fill geo-info">
             <div class="row">
-                <div class="col-6">
+                <div class="col-8">
                     <p class="fw-bold">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-map-fill" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M3.1 11.2a.5.5 0 0 1 .4-.2H6a.5.5 0 0 1 0 1H3.75L1.5 15h13l-2.25-3H10a.5.5 0 0 1 0-1h2.5a.5.5 0 0 1 .4.2l3 4a.5.5 0 0 1-.4.8H.5a.5.5 0 0 1-.4-.8z"/>
@@ -26,7 +26,7 @@
                         Geo information
                     </p>
                 </div>
-                <div class="col-6">
+                <div class="col-4">
                     <p class="fw-bold">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags-fill" viewBox="0 0 16 16">
                             <path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
@@ -47,7 +47,7 @@
                         <li>Map:</li>
                     </ul>
                 </div>
-                <div class="col-3">
+                <div class="col-5">
                     <ul class="geo-info">
                         <li>
                             {% if post.machine.lat %}
@@ -65,14 +65,14 @@
                         </li>
                         <li>
                             {% if post.machine.zip is not None %}
-                            <a href="{% url 'post_by_zip' post.machine.zip.slug %}">{{ post.machine.zip.code }}</a>
+                            <a href="{% url 'posts_by_zip' post.machine.zip.slug %}">{{ post.machine.zip.code }}</a>
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
                             {% if post.machine.city is not None %}
-                            <a href="{% url 'post_by_city' post.machine.city.slug %}">{{ post.machine.city.name }}</a>
+                            <a href="{% url 'posts_by_city' post.machine.city.slug %}">{{ post.machine.city.name }}</a>
                             {% else %}
                             -
                             {% endif %}
@@ -100,9 +100,9 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-6">
+                <div class="col-4">
                     {% for tag in post.tags.all %}
-                    <a href="{% url 'tag_detail' tag.slug %}"><span class="badge rounded-pill bg-primary text-bg-primary">{{ tag.name }}</span></a>
+                    <a href="{% url 'posts_by_tag' tag.slug %}"><span class="badge rounded-pill bg-primary text-bg-primary">{{ tag.name }}</span></a>
                     {% endfor %}
                 </div>
             </div>

@@ -1,0 +1,15 @@
+{% load thumbnail %}
+
+{% for post in posts %}
+<div class="col-lg-4 d-flex justify-content-evenly justify-content-xxl-start my-3">
+    <a href="{% url 'post_detail' post.id %}">
+        {% thumbnail post.machine.img "300x300" crop="center" as im %}
+        <img src="{{ im.url }}" class="rounded block-shadow" width="{{ im.width }}" height="{{ im.height }}">
+        {% endthumbnail %}
+    </a>
+</div>
+{% empty %}
+<div class="col-lg-4 d-flex justify-content-evenly justify-content-xxl-start my-3">
+    <p>No vending machine found in your area :(</p>
+</div>
+{% endfor %}
