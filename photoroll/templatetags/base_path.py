@@ -4,6 +4,5 @@ from django.template.defaultfilters import stringfilter
 register = template.Library()
 
 @register.filter(name="base_path")
-@stringfilter
-def base_path(value):
-    return value.split('/')[1]
+def base_path(value, item=1):
+    return value.split('/')[item]
