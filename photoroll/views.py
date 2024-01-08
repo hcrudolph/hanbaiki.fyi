@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views import generic
 from .forms import UploadFilesForm, UploadCameraForm
-from .forms import UploadForm
+from django.db.models import Q
 from .models import *
+
 
 ######################
 # Global definitions #
@@ -138,6 +139,28 @@ class PostByZipListView(generic.ListView):
             is_published=True,
             machine__zip__slug=self.kwargs['zip'],
         )
+
+def posts_by_location(request, lat:float, lon:float):
+    try:
+        lat = float(lat)
+        lon = float(lon)
+    except TypeError:
+        logging.error(f"Could not convert into float LAT:{lat} LON:{lon}.")
+
+    # search in an area of +/- 500 meters
+    max_lat = lat + 0.005
+    min_lat = lat - 0.005
+    max_lon = lon + 0.005
+    min_lon = lon - 0.005
+    posts = Post.objects.filter(
+        Q(machine__lat__gte=min_lat) & Q(machine__lat__lte=max_lat) & \
+        Q(machine__lon__gte=min_lon) & Q(machine__lon__lte=max_lon)
+    )
+    return render(request, "photoroll/post_list_plain.html", {'posts':posts})
+
+def current_location(request):
+    return render(request, "photoroll/current_location.html")
+
 
 ######################
 # Restricted Views   #

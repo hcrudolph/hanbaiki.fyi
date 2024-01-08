@@ -1,0 +1,47 @@
+{% extends "photoroll/base.html" %}
+
+{% block content %}
+<div class="row d-flex">
+    <div class="col-12">
+        <h1>Search by location</h1>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6 offset-lg-3">
+        <button id="gpsButton" onclick="getCurrentPosition()" class="btn btn-lg btn-primary w-100">
+        Search
+        </button>
+    </div>
+</div>
+<div class="row d-flex flex-wrap" id="searchResults" hx-trigger="receiveGpsData" hx-swap="innerHTML"></div>
+{% endblock content %}
+
+{% block customjs %}
+<script>
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+    };
+
+    function success(pos) {
+        const crd = pos.coords;
+        document.getElementById("searchResults").setAttribute("hx-get", "/posts/search/location/" + crd.latitude + "/" + crd.longitude + "/");
+        htmx.process(htmx.find("#searchResults"));
+        htmx.trigger("#searchResults", "receiveGpsData");
+        document.getElementById("gpsButton").innerHTML = "Search";
+        document.getElementById("gpsButton").classList.remove("disabled");
+    }
+
+    function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+
+    function getCurrentPosition(err) {
+        document.getElementById("gpsButton").classList.add("disabled");
+        document.getElementById("gpsButton").innerHTML = "Loading...";
+        navigator.geolocation.getCurrentPosition(success, error, options);
+    }
+</script>
+{% endblock customjs %}
