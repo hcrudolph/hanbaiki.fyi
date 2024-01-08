@@ -13,7 +13,7 @@ img.block-shadow:hover{
 
 @font-face {
     font-family: BungeeShade;
-    src: url(https://hanbaiki-fyi.s3.amazonaws.com/static/fonts/BungeeShade.ttf);
+    src: url(/static/fonts/BungeeShade.ttf);
 }
 
 body {
