@@ -6,10 +6,10 @@ from django.views import generic
 
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy("login")
-    template_name = "registration/signup.html"
+    success_url = reverse_lazy('login')
+    template_name = 'accounts/signup.html'
 
 class SignInView(LoginView):
     form_class = SignInForm
-    success_url = reverse_lazy("index")
-    template_name = "registration/signin.html"
+    success_url = reverse_lazy('index')
+    template_name = 'accounts/signin.html'

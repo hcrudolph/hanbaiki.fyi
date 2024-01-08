@@ -1,6 +1,6 @@
 {% extends "photoroll/base.html" %}
-{% block content %}
 
+{% block content %}
 <div class="row d-flex justify-content-md-center justify-content-lg-start">
     <div class="col-md-6 offset-lg-3">
         <form method="post">
@@ -9,7 +9,7 @@
             {{ form.username }}
             <label for="PasswordInput" class="form-label mt-3">Password</label>
             {{ form.password }}
-            <label for="CaptchaInput" class="form-label mt-3">Captcha</label>
+            <label for="CaptchaInput_1" class="form-label mt-3">Captcha</label>
             {{ form.captcha }}
             <button type="submit" class="btn btn-primary mt-3 w-100">Log In</button>
         </form>
@@ -18,6 +18,9 @@
 <div class="row d-flex justify-content-md-center justify-content-lg-start">
     <div class="col-md-6 offset-lg-3 mt-4">
         <p class="text-center">Don't have an account yet? <a href="{% url 'signup' %}">Sign Up</a></p>
+    </div>
+    <div class="col-md-6 offset-lg-3 mt-1">
+        <p class="text-center"><a href="{% url 'password_reset_request' %}">Forgot you password?</a></p>
     </div>
 </div>
 
