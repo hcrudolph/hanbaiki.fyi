@@ -193,3 +193,15 @@ CAPTCHA_LENGTH = 6
 # Mapbox API access
 
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN')
+
+# Email
+# Email backend
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+## Email server config
+#EMAIL_HOST = <hostname>
+#EMAIL_HOST_PORT = <port>
+#EMAIL_USE_TLS = True
+#EMAIL_HOST_USER = <sender@domain.tld>
+#EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
