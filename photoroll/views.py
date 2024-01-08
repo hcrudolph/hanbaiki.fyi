@@ -4,6 +4,7 @@ from django.contrib.messages import constants as messages
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views import generic
+from .forms import UploadFilesForm, UploadCameraForm
 from .forms import UploadForm
 from .models import *
 
@@ -143,9 +144,9 @@ class PostByZipListView(generic.ListView):
 ######################
 
 @login_required
-def upload(request):
+def upload_file(request):
     if request.method == "POST":
-        form = UploadForm(request.POST, request.FILES)
+        form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
             images = request.FILES.getlist('img')
             image_count = 0
@@ -159,5 +160,25 @@ def upload(request):
             messages.success(request, f"{image_count} image(s) uploaded successfully.")
             return HttpResponseRedirect("/")
     else:
-        form = UploadForm()
-    return render(request, "photoroll/upload.html", {"form": form})
+        form = UploadFilesForm()
+    return render(request, "photoroll/upload_file.html", {"form": form})
+
+@login_required
+def upload_camera(request):
+    if request.method == "POST":
+        form = UploadCameraForm(request.POST, request.FILES)
+        if form.is_valid():
+            images = request.FILES.getlist('img')
+            image_count = 0
+            for image in images:
+                vm = VendingMachine(
+                    img = image,
+                    created_by = request.user
+                )
+                vm.save()
+                image_count+=1
+            messages.success(request, f"{image_count} image(s) uploaded successfully.")
+            return HttpResponseRedirect("/")
+    else:
+        form = UploadCameraForm()
+    return render(request, "photoroll/upload_camera.html", {"form": form})
