@@ -2,11 +2,6 @@
 <html lang="en">
 <head>
     {% include "photoroll/head.html" %}
-    <style>
-        body {
-            margin-bottom: 50px;
-        }
-    </style>
     {% block customcss %}{% endblock customcss %}
 </head>
 <body>
@@ -15,12 +10,16 @@
         {% if messages %}
         <div class="row messages">
         {% for message in messages %}
-        <div {% if message.tags %} role="alert" class="alert alert-{{ message.tags }} alert-dismissible fade show"{% endif %}>{{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="col-12">
+                <div {% if message.tags %} role="alert" class="alert alert-{{ message.tags }} alert-dismissible fade show"{% endif %}>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         {% endfor %}
         </div>
         {% endif %}
+
         {% block content %}{% endblock content %}
+
         {% block pagination %}
         {% if is_paginated %}
         <div class="pagination justify-content-center mt-5">

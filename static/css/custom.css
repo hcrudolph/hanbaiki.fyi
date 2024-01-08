@@ -1,0 +1,48 @@
+img.block-shadow:hover{
+    box-shadow:
+    1px 1px #373737,
+    2px 2px #373737,
+    3px 3px #373737,
+    4px 4px #373737,
+    5px 5px #373737,
+    6px 6px #373737;
+    -webkit-transform: translateX(-3px);
+    transform: translateX(-3px);
+    transition: .25s ease;
+}
+
+@font-face {
+    font-family: BungeeShade;
+    src: url(https://hanbaiki-fyi.s3.amazonaws.com/static/fonts/BungeeShade.ttf);
+}
+
+body {
+    margin-bottom: 50px;
+}
+
+.title-brand {
+    font-family: BungeeShade, sans-serif;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+ul.geo-info {
+    margin: 0;
+    padding: 0;
+}
+
+ul.geo-info > li {
+    list-style-type: none;
+}
+
+div.geo-info {
+    background-color: #eee;
+}
+
+.post-image {
+    max-height: 600px;
+}
+
+span.red-text {
+    color: red;
+}
