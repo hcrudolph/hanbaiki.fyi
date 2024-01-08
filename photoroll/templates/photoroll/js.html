@@ -1,3 +1,27 @@
 {% load static %}
 <script src="{% static 'js/bootstrap.bundle.min.js' %}" defer></script>
 <script src="{% static 'js/htmx.min.js' %}" defer></script>
+<script>
+function blinking_chars(text) {
+    for (var i = 0; i < text.length; i++) {
+        setTimeout(function(elem) {
+            elem.style.color = '#00cd00';
+        }, 250 * i, text[i]);
+    };
+    setTimeout(function() {
+        for (var i = 0; i < text.length; i++) {
+            setTimeout(function(elem) {
+                elem.style.color = '#000000';
+            }, 250 * i, text[i]);
+        };
+    }, 750);
+};
+
+function blinking_animation(func, interval){
+    let title_chars = document.getElementById("headerTitle").children;
+    blinking_chars(title_chars);
+    setInterval(blinking_chars, 5000, title_chars);
+};
+
+blinking_animation(blinking_chars, 5000);
+</script>
