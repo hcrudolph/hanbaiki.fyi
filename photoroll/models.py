@@ -1,13 +1,15 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.signals import user_logged_out, user_logged_in
+from django.contrib import messages
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.utils.html import mark_safe
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
-
 import requests
 import logging
+
 from django_resized import ResizedImageField
 from uuid import uuid4
 from datetime import date
@@ -115,6 +117,7 @@ def machine_post_processing(instance):
 def get_sentinel_user():
     User = get_user_model()
     return User.objects.get_or_create(username="deleted")[0]
+
 
 ######################
 # Model definitions  #
@@ -390,3 +393,11 @@ def read_exif_data(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=VendingMachine)
 def delete_associated_media(sender, instance, *args, **kwargs):
     instance.img.delete()
+
+@receiver(user_logged_out)
+def on_user_logged_out(sender, request, **kwargs):
+    messages.add_message(request, messages.SUCCESS, 'Logged out successfully.')
+
+@receiver(user_logged_in)
+def on_user_logged_in(sender, request, **kwargs):
+    messages.add_message(request, messages.SUCCESS, 'Logged in successfully.')
