@@ -32,6 +32,10 @@ ALLOWED_HOSTS = [
     'www.hanbaiki.fyi'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.hanbaiki.fyi',
+]
+
 # Application definition
 
 INSTALLED_APPS = [
