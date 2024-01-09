@@ -3,14 +3,24 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views import generic
+from django.conf import settings
 from .forms import UploadFilesForm, UploadCameraForm
 from django.db.models import Q
 from .models import *
+import boto3
 
 
 ######################
 # Global definitions #
 ######################
+
+class GpsMissingException(Exception):
+    "Raised when the processes image does not contain GPS coordinates"
+    pass
+
+class ConfidenceLevelException(Exception):
+    "Raised when the processes image does not clear the defined confidence threshold"
+    pass
 
 def gps_dec_to_deg(dec:float):
     result = dict()
@@ -19,11 +29,40 @@ def gps_dec_to_deg(dec:float):
     result['second'] = round((((dec - result['degree']) * 60) - result['minute']) * 60, 4)
     return result
 
-MESSAGE_TAGS = {
-    messages.ERROR: "danger",
-    "silent": "light",
-}
+def get_confidence_by_label(bucket, photo, label) -> float:
+    session = boto3.Session(profile_name='default')
+    client = session.client('rekognition')
+    response = client.detect_labels(
+        Image={'S3Object':{'Bucket':bucket,'Name':photo}},
+        MaxLabels=1,
+        Features=['GENERAL_LABELS'],
+        Settings={'GeneralLabels': {'LabelInclusionFilters':[label]}},
+    )
+    try:
+        result = float(response['Labels'][0]['Confidence'])
+    except:
+        result = 0.
+    return result
 
+def process_image(request, image):
+    vm = VendingMachine.objects.create(img=image, created_by=request.user)
+    # if save failed due to missing GPS coordinates
+    if vm.id is None:
+        logging.error('Upload failed. Image does not contain GPS data.')
+        messages.error(request, 'Upload failed. Image does not contain GPS data.')
+        raise GpsMissingException
+    else:
+        confidence = get_confidence_by_label(
+            settings.AWS_STORAGE_BUCKET_NAME,
+            f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
+            'Vending Machine'
+        )
+        # confidence level for given label too low
+        if confidence < 95.:
+            logging.error(f"Upload failed. Image did not clear confidence threshold ({confidence})")
+            messages.error(request, 'Upload failed. Image does not seem to contain a vending machine.')
+            vm.delete()
+            raise ConfidenceLevelException
 
 ######################
 # View definitions   #
@@ -108,7 +147,7 @@ class PostsByTagListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"Vending machines tagged with '{self.kwargs['slug'].capitalize()}'"
+        context['page_title'] = f"Vending machines tagged with '{self.kwargs['slug'].capitalize()}'"
         return context
 
     def get_queryset(self):
@@ -122,7 +161,7 @@ class PostByYearListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"Vending machines from {self.kwargs['year']}"
+        context['page_title'] = f"Vending machines from {self.kwargs['year']}"
         return context
 
     def get_queryset(self):
@@ -138,7 +177,7 @@ class PostByMonthListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"Vending machines from {self.kwargs['year']}/{self.kwargs['month']}"
+        context['page_title'] = f"Vending machines from {self.kwargs['year']}/{self.kwargs['month']}"
         return context
 
     def get_queryset(self):
@@ -155,7 +194,7 @@ class PostByCityListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"Vending machines in {self.kwargs['city'].capitalize()}"
+        context['page_title'] = f"Vending machines in {self.kwargs['city'].capitalize()}"
         return context
 
     def get_queryset(self):
@@ -171,7 +210,7 @@ class PostByZipListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = f"Vending machines in {self.kwargs['zip']}"
+        context['page_title'] = f"Vending machines in {self.kwargs['zip']}"
         return context
 
     def get_queryset(self):
@@ -196,10 +235,10 @@ def posts_by_location(request, lat:float, lon:float):
         Q(machine__lat__gte=min_lat) & Q(machine__lat__lte=max_lat) & \
         Q(machine__lon__gte=min_lon) & Q(machine__lon__lte=max_lon)
     )
-    return render(request, "photoroll/post_list_plain.html", {'posts':posts})
+    return render(request, 'photoroll/post_list_plain.html', {'posts':posts})
 
 def current_location(request):
-    return render(request, "photoroll/current_location.html")
+    return render(request, 'photoroll/current_location.html')
 
 
 ######################
@@ -208,40 +247,38 @@ def current_location(request):
 
 @login_required
 def upload_file(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
             images = request.FILES.getlist('img')
             image_count = 0
             for image in images:
-                vm = VendingMachine(
-                    img = image,
-                    created_by = request.user
-                )
-                vm.save()
-                image_count+=1
+                try:
+                    process_image(request, image)
+                    image_count+=1
+                except (GpsMissingException, ConfidenceLevelException) as e:
+                    return HttpResponseRedirect('/')
             messages.success(request, f"{image_count} image(s) uploaded successfully.")
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect('/')
     else:
         form = UploadFilesForm()
-    return render(request, "photoroll/upload_file.html", {"form": form})
+    return render(request, 'photoroll/upload_file.html', {'form': form})
 
 @login_required
 def upload_camera(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         form = UploadCameraForm(request.POST, request.FILES)
         if form.is_valid():
             images = request.FILES.getlist('img')
             image_count = 0
             for image in images:
-                vm = VendingMachine(
-                    img = image,
-                    created_by = request.user
-                )
-                vm.save()
-                image_count+=1
+                try:
+                    process_image(request, image)
+                    image_count+=1
+                except (GpsMissingException, ConfidenceLevelException) as e:
+                    return HttpResponseRedirect('/')
             messages.success(request, f"{image_count} image(s) uploaded successfully.")
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect('/')
     else:
         form = UploadCameraForm()
-    return render(request, "photoroll/upload_camera.html", {"form": form})
+    return render(request, 'photoroll/upload_camera.html', {'form': form})
