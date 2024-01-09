@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from django.contrib.messages import constants as messages
 from pathlib import Path
 import os
 
@@ -216,3 +217,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #    'MAILGUN_API_KEY': os.getenv('MAILGUN_ACCESS_TOKEN'),
 #    'MAILGUN_SENDER_DOMAIN': 'mg.hanbaiki.fyi',
 #}
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+}
