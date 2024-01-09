@@ -201,8 +201,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
 ## Email server config
-#DEFAULT_FROM_EMAIL = noreply@hanbaiki.fyi
-#SERVER_EMAIL = root@hanbaiki.fyi
+#DEFAULT_FROM_EMAIL = 'noreply@hanbaiki.fyi'
+#SERVER_EMAIL = 'root@hanbaiki.fyi'
 #EMAIL_HOST = <hostname>
 #EMAIL_HOST_PORT = <port>
 #EMAIL_USE_TLS = True
@@ -211,5 +211,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 #ANYMAIL = {
 #    'MAILGUN_API_KEY': os.getenv('MAILGUN_ACCESS_TOKEN'),
-#    'MAILGUN_SENDER_DOMAIN': 'mg.hanbaiki.fyi'
+#    'MAILGUN_SENDER_DOMAIN': 'mg.hanbaiki.fyi',
 #}
