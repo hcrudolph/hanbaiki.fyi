@@ -2,9 +2,11 @@ asgiref
 boto3
 botocore
 certifi
+cffi
 charset-normalizer
+cryptography
 Django
-django-htmx
+django-anymail
 django-ranged-response
 django-resized
 django-simple-captcha
@@ -13,8 +15,9 @@ gunicorn
 idna
 jmespath
 packaging
-Pillow
+pillow
 pillow-heif
+pycparser
 python-dateutil
 requests
 s3transfer
