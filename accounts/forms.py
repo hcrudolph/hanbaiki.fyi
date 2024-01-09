@@ -22,6 +22,7 @@ class SignUpForm(UserCreationForm):
             'autocomplete': 'off',
             'type': 'email',
             'id': 'EmailInput',
+            'required': 'true',
         })
         self.fields['username'].widget.attrs.update({
             'class': 'form-control',
