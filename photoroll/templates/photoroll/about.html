@@ -10,7 +10,23 @@
 
 <div class="row d-flex">
     <div class="col-12">
-        {% lorem %}
+        <h2>What is HANBAIKI.FYI?</h2>
+        <p>This site is part documentary project, part educational exercise. The idea to record and map some of the thousands of vending machines (自動販売機・jidou hanbaiki) in Japan was there for a while. However, there is no way a single person could ever get around to do this on their own. So, I decided to crowdsource it. At the same time, I wanted to toy around with some new technology, including image recognition, that would help with sanitization of people's submissions.</p>
+        <p>Of course, this site may well remain a personal side project. However, I would be happy if some people do find value in the information provided, or better still contribute some images of their own.</p>
+
+        <h2>What happens to images uploaded to this site?</h2>
+        <p>At a high level, uploaded images are processed as follows:</p>
+        <ol>
+            <li>Image recognition: We use image recognition to check if uploaded files indeed contain vending machines. If the confidence score for an image lies above a certain threshold, processing continues.</li>
+            <li>Image analysis: We read <abbr title="Exchangeable Image File Format">EXIF</abbr> data embedded by the camera into the image to extract the <abbr title="Global Positioning System">GPS</abbr> coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
+            <li>Image publication: Processed images are published on our site alongside its GPS coordinates and basic location information, such as state (県・都), city (区・市), postcode (〒), and town (町・村), if available.</li>
+        </ol>
+
+        <h2>Why should I trust this site?</h2>
+        <p>Luckily, you don't have to. The entire source code is open-source and available on <a href="https://github.com/hcrudolph/hanbaiki.fyi" target="_blank">GitHub</a>.</p>
+
+        <h2>I found a bug! What should I do now?</h2>
+        <p>Please take the time to file an issue on <a href="https://github.com/hcrudolph/hanbaiki.fyi" target="_blank">GitHub</a>.</p>
     </div>
 </div>
 
