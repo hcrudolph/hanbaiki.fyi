@@ -14,7 +14,9 @@ urlpatterns = [
     path('login/', SignInView.as_view(), name='login'),
     path('password-reset/', PasswordResetView.as_view(
         template_name='accounts/password_reset.html',
+        email_template_name='accounts/password_reset_email_txt.html',
         html_email_template_name='accounts/password_reset_email.html',
+        subject_template_name='accounts/password_reset_subject.txt',
         form_class = PasswordResetForm,
         success_url = reverse_lazy('pw_reset_sent'),
     ), name='password_reset_request'),
