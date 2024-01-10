@@ -10,6 +10,10 @@ class SignUpView(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'accounts/signup.html'
 
+    def form_valid(self, form):
+        messages.success(self.request, 'Signed up successfully.')
+        return super().form_valid(form)
+
 class SignInView(LoginView):
     form_class = SignInForm
     success_url = reverse_lazy('index')
