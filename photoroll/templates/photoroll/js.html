@@ -5,7 +5,7 @@
 function blinking_chars(text) {
     for (var i = 0; i < text.length; i++) {
         setTimeout(function(elem) {
-            elem.style.color = '#00cd00';
+            elem.style.color = '#00b400';
         }, 250 * i, text[i]);
     };
     setTimeout(function() {
@@ -18,7 +18,7 @@ function blinking_chars(text) {
 };
 
 function blinking_animation(func, interval){
-    let title_chars = document.getElementById("headerTitle").children;
+    let title_chars = document.querySelectorAll("#headerTitle > span");
     blinking_chars(title_chars);
     setInterval(blinking_chars, 5000, title_chars);
 };

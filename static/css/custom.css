@@ -25,6 +25,14 @@ body {
     font-size: 1.75em;
 }
 
+a.title-brand > small {
+    display: block;
+    font-family: sans-serif;
+    font-size: .4em;
+    text-transform: uppercase;
+    letter-spacing: .175rem;
+}
+
 ul.geo-info {
     margin: 0;
     padding: 0;
