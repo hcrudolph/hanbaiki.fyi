@@ -147,7 +147,8 @@ class PostsByTagListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = f"Vending machines tagged with '{self.kwargs['slug'].capitalize()}'"
+        tag = Tag.objects.get(slug=self.kwargs['slug'])
+        context['page_title'] = f"Vending machines tagged '{tag.name}'"
         return context
 
     def get_queryset(self):
