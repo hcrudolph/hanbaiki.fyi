@@ -112,7 +112,7 @@ def machine_post_processing(instance):
     else:
         instance.town = None
     instance.save()
-    Post.objects.create(machine=instance)
+    Post.objects.create(vendingmachine=instance)
 
 def get_sentinel_user():
     User = get_user_model()
