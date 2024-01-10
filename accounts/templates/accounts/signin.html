@@ -25,3 +25,35 @@
 </div>
 
 {% endblock content %}
+
+{% block customjs %}
+<script>
+function enableCaptchaRefresh() {
+    var refresh_link = document.createElement('a');
+    refresh_link.setAttribute('id', 'captcha-refresh');
+    refresh_link.setAttribute('class', 'btn btn-sm btn-outline-secondary mx-2');
+    refresh_link.setAttribute('onclick', 'captchaRefresh()');
+    document.querySelector('img.captcha').after(refresh_link);
+    refresh_link.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>';
+};
+
+function captchaRefresh() {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status == 200) {
+                var data = JSON.parse(request.responseText);
+                captcha_input = document.querySelector('input[name="captcha_0"]');
+                captcha_input.value = data.key;
+                captcha_image = document.querySelector('img.captcha');
+                captcha_image.setAttribute('src', data.image_url);
+            }
+        }
+    };
+    request.open('GET', "/captcha/refresh/", true);
+    request.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    request.send();
+};
+enableCaptchaRefresh();
+</script>
+{% endblock customjs %}
