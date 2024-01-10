@@ -13,7 +13,7 @@
 </div>
 <div class="row d-flex flex-wrap">
     <div class="col-lg-6 d-flex justify-content-center my-2">
-        <img class="img-fluid post-image" src="{{ post.machine.img.url }}"/>
+        <img class="img-fluid post-image" src="{{ post.vendingmachine.img.url }}"/>
     </div>
     <div class="col-lg-6 border p-4 my-2 flex-fill geo-info">
             <div class="row">
@@ -50,36 +50,36 @@
                 <div class="col-5">
                     <ul class="geo-info">
                         <li>
-                            {% if post.machine.lat %}
-                            {{ post.machine.lat }}
+                            {% if post.vendingmachine.lat %}
+                            {{ post.vendingmachine.lat }}
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.lat %}
-                            {{ post.machine.lon }}
+                            {% if post.vendingmachine.lat %}
+                            {{ post.vendingmachine.lon }}
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.zip is not None %}
-                            <a href="{% url 'posts_by_zip' post.machine.zip.slug %}">{{ post.machine.zip.code }}</a>
+                            {% if post.vendingmachine.zip is not None %}
+                            <a href="{% url 'posts_by_zip' post.vendingmachine.zip.slug %}">{{ post.vendingmachine.zip.code }}</a>
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.city is not None %}
-                            <a href="{% url 'posts_by_city' post.machine.city.slug %}">{{ post.machine.city.name }}</a>
+                            {% if post.vendingmachine.city is not None %}
+                            <a href="{% url 'posts_by_city' post.vendingmachine.city.slug %}">{{ post.vendingmachine.city.name }}</a>
                             {% else %}
                             -
                             {% endif %}
                         </li>
                         <li>
-                            {% if post.machine.town %}
-                            {{ post.machine.town }}
+                            {% if post.vendingmachine.town %}
+                            {{ post.vendingmachine.town }}
                             {% else %}
                             -
                             {% endif %}
@@ -90,7 +90,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.google.com/maps/place/{{ lat_deg.degree }}°{{ lat_deg.minute }}'{{ lat_deg.second }}%22N+{{ lon_deg.degree }}°{{ lon_deg.minute }}'{{ lon_deg.second }}%22E/@{{ post.machine.lat }},{{ post.machine.lon }},18z/" target="_blank">
+                            <a href="https://www.google.com/maps/place/{{ lat_deg.degree }}°{{ lat_deg.minute }}'{{ lat_deg.second }}%22N+{{ lon_deg.degree }}°{{ lon_deg.minute }}'{{ lon_deg.second }}%22E/@{{ post.vendingmachine.lat }},{{ post.vendingmachine.lon }},18z/" target="_blank">
                                 Google Maps
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
@@ -101,7 +101,7 @@
                     </ul>
                 </div>
                 <div class="col-4">
-                    {% for tag in post.tags.all %}
+                    {% for tag in post.vendingmachine.tags.all %}
                     <a href="{% url 'posts_by_tag' tag.slug %}"><span class="badge rounded-pill bg-primary text-bg-primary">{{ tag.name }}</span></a>
                     {% endfor %}
                 </div>

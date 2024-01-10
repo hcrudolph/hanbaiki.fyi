@@ -86,8 +86,8 @@ def post_detail(request, post_id):
     )
     context = {
         'post': post,
-        'lat_deg': gps_dec_to_deg(post.machine.lat),
-        'lon_deg': gps_dec_to_deg(post.machine.lon),
+        'lat_deg': gps_dec_to_deg(post.vendingmachine.lat),
+        'lon_deg': gps_dec_to_deg(post.vendingmachine.lon),
     }
     return render(request, 'photoroll/post.html', context)
 
@@ -98,8 +98,8 @@ def post_map(request, post_id):
     )
     context = {
         'id': post.id,
-        'lat': post.machine.lat,
-        'lon': post.machine.lon,
+        'lat': post.vendingmachine.lat,
+        'lon': post.vendingmachine.lon,
         'mapbox_token': settings.MAPBOX_ACCESS_TOKEN,
     }
     return render(request, 'photoroll/map.html', context)
@@ -138,7 +138,7 @@ class TagListView(generic.ListView):
     template_name = 'photoroll/tag_list.html'
 
     def get_queryset(self):
-        return Tag.objects.exclude(post=None)
+        return Tag.objects.exclude(vendingmachine__post=None)
 
 class PostsByTagListView(generic.ListView):
     model = Post
@@ -152,7 +152,7 @@ class PostsByTagListView(generic.ListView):
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, slug=self.kwargs['slug'])
-        return Post.objects.filter(tags=self.tag)
+        return Post.objects.filter(vendingmachine__tags=self.tag)
 
 class PostByYearListView(generic.ListView):
     model = Post
@@ -200,7 +200,7 @@ class PostByCityListView(generic.ListView):
     def get_queryset(self):
         return Post.objects.filter(
             is_published=True,
-            machine__city__slug=self.kwargs['city'],
+            vendingmachine__city__slug=self.kwargs['city'],
         )
 
 class PostByZipListView(generic.ListView):
@@ -216,7 +216,7 @@ class PostByZipListView(generic.ListView):
     def get_queryset(self):
         return Post.objects.filter(
             is_published=True,
-            machine__zip__slug=self.kwargs['zip'],
+            vendingmachine__zip__slug=self.kwargs['zip'],
         )
 
 def posts_by_location(request, lat:float, lon:float):
@@ -232,8 +232,8 @@ def posts_by_location(request, lat:float, lon:float):
     max_lon = lon + 0.005
     min_lon = lon - 0.005
     posts = Post.objects.filter(
-        Q(machine__lat__gte=min_lat) & Q(machine__lat__lte=max_lat) & \
-        Q(machine__lon__gte=min_lon) & Q(machine__lon__lte=max_lon)
+        Q(vendingmachine__lat__gte=min_lat) & Q(vendingmachine__lat__lte=max_lat) & \
+        Q(vendingmachine__lon__gte=min_lon) & Q(vendingmachine__lon__lte=max_lon)
     )
     return render(request, 'photoroll/post_list_plain.html', {'posts':posts})
 

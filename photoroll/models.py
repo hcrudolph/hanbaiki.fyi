@@ -132,8 +132,9 @@ class VendingMachine(models.Model):
         ext = filename.split('.')[-1].lower()
         return f"{date_path}/{uuid4().hex}.{ext}"
 
-    def img_tag(self):
+    def img_tag(self)-> str:
         return mark_safe(f"<img src='{self.img.url}' height='100' />")
+    img_tag.short_description = 'Image'
 
     img = ResizedImageField(
         upload_to = random_fname,
@@ -180,6 +181,9 @@ class VendingMachine(models.Model):
         null=True,
         blank=True,
     )
+    tags = models.ManyToManyField(
+        'Tag'
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET(get_sentinel_user),
@@ -193,8 +197,6 @@ class VendingMachine(models.Model):
         auto_now=True,
     )
 
-    img_tag.short_description = 'Image'
-
     def __str__(self) -> str:
         return f"#{self.id} {self.date_created.strftime('%Y/%m/%d')}"
 
@@ -203,16 +205,21 @@ class Post(models.Model):
         ordering=['-date_published']
         get_latest_by='date_published'
 
+    def img_tag(self) -> str:
+        return mark_safe(f"<img src='{self.vendingmachine.img.url}' height='100' />")
+    img_tag.short_description = 'Vending machine'
+
+    def str_tag(self) -> str:
+        return self.__str__()
+    str_tag.short_description = 'Post title'
+
     slug = models.SlugField(
         unique=True,
         editable=False,
     )
-    machine = models.ForeignKey(
+    vendingmachine = models.ForeignKey(
         'VendingMachine',
         on_delete=models.CASCADE,
-    )
-    tags = models.ManyToManyField(
-        'Tag'
     )
     is_published = models.BooleanField(
         default=True,
@@ -225,7 +232,7 @@ class Post(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.date_published.strftime('%Y/%m/%d')
+        return f"Post #{self.id} ({self.date_published.strftime('%Y/%m/%d')})"
 
 class Tag(models.Model):
     class Meta:
@@ -333,7 +340,7 @@ class ZipCode(models.Model):
 @receiver(pre_save, sender=Post)
 def create_slug(sender, instance, *args, **kwargs):
     if not instance.slug:
-        instance.slug = slugify_post(instance.machine.img.name)
+        instance.slug = slugify_post(instance.vendingmachine.img.name)
 
 @receiver(pre_save, sender=Tag)
 def create_slug_from_tag_name(sender, instance, *args, **kwargs):
