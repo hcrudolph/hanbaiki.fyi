@@ -10,23 +10,31 @@
 
 <div class="row d-flex">
     <div class="col-12">
-        <h2>What is HANBAIKI.FYI?</h2>
-        <p>This site is part documentary project, part educational exercise. The idea to record and map some of the thousands of vending machines (自動販売機・jidou hanbaiki) in Japan was there for a while. However, there is no way a single person could ever get around to do this on their own. So, I decided to crowdsource it. At the same time, I wanted to toy around with some new technology, including image recognition, that would help with sanitization of people's submissions.</p>
-        <p>Of course, this site may well remain a personal side project. However, I would be happy if some people do find value in the information provided, or better still contribute some images of their own.</p>
+        <p>HANBAIKI.FYI is part documentary project, part educational exercise. The idea to record and map some of the thousands of vending machines (自動販売機・jidou hanbaiki) in Japan was there for a while. However, there is no way a single person could ever get around to do this on their own. So, I decided to crowdsource it. At the same time, I wanted to toy around with some new technology, including image recognition, that would help with sanitization of people's submissions.</p>
+        <p>Of course, this site may well remain a personal side project. However, I would be happy if some people do find value in the information, or better still contribute some photos of their own.</p>
 
-        <h2>What happens to images uploaded to this site?</h2>
-        <p>At a high level, uploaded images are processed as follows:</p>
+        <hr class="my-5"/>
+
+        <h2>FAQ</h2>
+        <h3>How can I upload new photos?</h3>
+        <p>To contribute photos, please <a href="{% url 'signup' %}">create an account</a> first. Once you are logged in, you will see an Upload button in the navigation bar.</p>
+
+        <h3>What happens to photos uploaded to this site?</h3>
+        <p>At a high level, uploaded photos are processed as follows:</p>
         <ol>
-            <li>Image recognition: We use image recognition to check if uploaded files indeed contain vending machines. If the confidence score for an image lies above a certain threshold, processing continues.</li>
-            <li>Image analysis: We read <abbr title="Exchangeable Image File Format">EXIF</abbr> data embedded by the camera into the image to extract the <abbr title="Global Positioning System">GPS</abbr> coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
-            <li>Image publication: Processed images are published on our site alongside its GPS coordinates and basic location information, such as state (県・都), city (区・市), postcode (〒), and town (町・村), if available.</li>
+            <li>Analysis: We read <abbr title="Exchangeable Image File Format">EXIF</abbr> data embedded  into the image by the camera to extract the <abbr title="Global Positioning System">GPS</abbr> coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
+            <li>Recognition: We use image recognition to check if uploaded files indeed contain vending machines. If the confidence score for an image lies above a certain threshold, processing continues.</li>
+            <li>Publication: Processed images are published on our site alongside its GPS coordinates and basic location information, such as state (県・都), city (区・市), postcode (〒), and town (町・村), if available.</li>
         </ol>
 
-        <h2>Why should I trust this site?</h2>
+        <h3>Why can I not take photos directly from the upload form?</h3>
+        <p>This site relies on the EXIF data embedded within the uploaded files to determine a photo's location. Unfortunately, the default camera dialog on iOS and Android -unless accessed directly via your camera app- does not embed GPS coordinates. Therefore, it is only possible for us to process photos that are already taken and saved, for example, in your gallery.</p>
+
+        <h3>Why should I trust this site?</h3>
         <p>Luckily, you don't have to. The entire source code is open-source and available on <a href="https://github.com/hcrudolph/hanbaiki.fyi" target="_blank">GitHub</a>.</p>
 
-        <h2>I found a bug! What should I do now?</h2>
-        <p>Please take the time to file an issue on <a href="https://github.com/hcrudolph/hanbaiki.fyi" target="_blank">GitHub</a>.</p>
+        <h3>I found a bug! What should I do now?</h3>
+        <p>Please take the time to file an issue on <a href="https://github.com/hcrudolph/hanbaiki.fyi/issues" target="_blank">GitHub</a>.</p>
     </div>
 </div>
 
