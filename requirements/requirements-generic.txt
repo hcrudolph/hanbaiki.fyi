@@ -7,6 +7,7 @@ charset-normalizer
 cryptography
 Django
 django-anymail
+django-otp
 django-ranged-response
 django-resized
 django-simple-captcha
@@ -18,10 +19,13 @@ packaging
 pillow
 pillow-heif
 pycparser
+pypng
 python-dateutil
+qrcode
 requests
 s3transfer
 six
 sorl-thumbnail
 sqlparse
+typing_extensions
 urllib3
