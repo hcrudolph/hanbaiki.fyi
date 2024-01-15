@@ -15,6 +15,5 @@ urlpatterns = [
     path('posts/search/zip/<str:zip>/', views.PostByZipListView.as_view(), name='posts_by_zip'),
     path('posts/search/tags/', views.TagListView.as_view(), name='tag_list'),
     path('posts/search/tags/<str:slug>/', views.PostsByTagListView.as_view(), name='posts_by_tag'),
-    path('upload/camera/', views.upload_camera, name='upload_camera'),
     path('upload/file/', views.upload_file, name='upload_file'),
 ]

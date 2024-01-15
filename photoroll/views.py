@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views import generic
 from django.conf import settings
-from .forms import UploadFilesForm, UploadCameraForm
+from .forms import UploadFilesForm
 from rapidfuzz import process, fuzz, utils
 from django.db.models import Q
 from .models import *
@@ -308,22 +308,3 @@ def upload_file(request):
     else:
         form = UploadFilesForm()
     return render(request, 'photoroll/upload_file.html', {'form': form})
-
-@login_required
-def upload_camera(request):
-    if request.method == 'POST':
-        form = UploadCameraForm(request.POST, request.FILES)
-        if form.is_valid():
-            images = request.FILES.getlist('img')
-            image_count = 0
-            for image in images:
-                try:
-                    process_image(request, image)
-                    image_count+=1
-                except (GpsMissingException, ConfidenceLevelException) as e:
-                    return HttpResponseRedirect('/')
-            messages.success(request, f"{image_count} image(s) uploaded successfully.")
-            return HttpResponseRedirect('/')
-    else:
-        form = UploadCameraForm()
-    return render(request, 'photoroll/upload_camera.html', {'form': form})

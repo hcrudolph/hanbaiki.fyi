@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row d-flex">
     <div class="col-12">
-        <h1>Upload multiple files</h1>
+        <h1>Upload files</h1>
     </div>
 </div>
 
@@ -15,14 +15,8 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.img }}
-            <!-- <input id="myFileInput" class="form-control" type="file" accept="image/*;capture=camera"> -->
             <button type="submit" class="btn btn-primary mt-3 w-100">Upload</button>
         </form>
-    </div>
-</div>
-<div class="row d-flex justify-content-md-center justify-content-lg-start  mt-4">
-    <div class="col-md-6 offset-lg-3">
-        <p class="text-center">Alternatively, <a href="{% url 'upload_camera' %}">take and upload a photo from your camera.</a></p>
     </div>
 </div>
 

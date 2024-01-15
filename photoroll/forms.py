@@ -4,9 +4,9 @@ from .models import VendingMachine
 class UploadFilesForm(forms.ModelForm):
     class Meta:
         model = VendingMachine
-        fields = ["img"]
+        fields = ['img']
         labels = {
-            "img": "",
+            'img': '',
         }
 
     def __init__(self, *args, **kwargs):
@@ -16,28 +16,6 @@ class UploadFilesForm(forms.ModelForm):
             'type': 'file',
             'id': 'ImgInput',
             'multiple': 'True',
-        })
-
-    widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'id': 'CaptchaInput'
-    })
-
-class UploadCameraForm(forms.ModelForm):
-    class Meta:
-        model = VendingMachine
-        fields = ["img"]
-        labels = {
-            "img": "",
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['img'].widget.attrs.update({
-            'class': 'form-control',
-            'type': 'file',
-            'id': 'ImgInput',
-            'accept': 'image/*;capture=camera',
         })
 
     widget=forms.TextInput(attrs={
