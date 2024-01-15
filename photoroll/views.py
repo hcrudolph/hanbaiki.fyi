@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.views import generic
 from django.conf import settings
 from .forms import UploadFilesForm, UploadCameraForm
+from rapidfuzz import process, fuzz, utils
 from django.db.models import Q
 from .models import *
 import boto3
@@ -44,6 +45,40 @@ def get_confidence_by_label(bucket, photo, label) -> float:
         result = 0.
     return result
 
+def add_new_or_greater(old_tags, new_tags):
+    for tag, score, _ in new_tags:
+        if tag in old_tags.keys():
+            if old_tags[tag] < score:
+                old_tags[tag] = score
+        else:
+            old_tags[tag] = score
+
+def generate_tags_from_image(bucket, photo, vm):
+    session = boto3.Session(profile_name='default')
+    client = session.client('rekognition')
+    existing_tags = list(Tag.objects.values_list('slug', flat=True))
+    candidate_tags = dict()
+
+    # detect text, only return matches with min. confidence of 90 or higher
+    response = client.detect_text(Image={'S3Object': {'Bucket': bucket, 'Name': photo}},
+                                  Filters={'WordFilter': {'MinConfidence': 90.0}})
+
+    # fuzzy match each match of type 'word' against existing tags
+    for text in filter(lambda x : x['Type'] == 'WORD', response['TextDetections']):
+        new_matches = process.extract(
+            text['DetectedText'].lower(),
+            existing_tags,
+            scorer=fuzz.WRatio,
+            processor=utils.default_process,
+            score_cutoff=80.,
+        )
+        add_new_or_greater(candidate_tags, new_matches)
+
+    # add relation for each detected tag
+    for key in candidate_tags.keys():
+        tag = Tag.objects.get(slug=key)
+        vm.tags.add(tag)
+
 def process_image(request, image):
     vm = VendingMachine.objects.create(img=image, created_by=request.user)
     # if save failed due to missing GPS coordinates
@@ -57,8 +92,17 @@ def process_image(request, image):
             f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
             'Vending Machine'
         )
-        # confidence level for given label too low
-        if confidence < 95.:
+        # only proceed with confident labels
+        if confidence > 95.:
+            try:
+                generate_tags_from_image(
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
+                    vm
+                )
+            except:
+                vm.delete()
+        else:
             logging.error(f"Upload failed. Image did not clear confidence threshold ({confidence})")
             messages.error(request, 'Upload failed. Image does not seem to contain a vending machine.')
             vm.delete()
