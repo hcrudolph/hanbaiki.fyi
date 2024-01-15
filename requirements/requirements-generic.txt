@@ -22,6 +22,7 @@ pycparser
 pypng
 python-dateutil
 qrcode
+rapidfuzz
 requests
 s3transfer
 six
