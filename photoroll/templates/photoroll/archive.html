@@ -3,13 +3,13 @@
 {% block content %}
 <div class="row d-flex">
     <div class="col-12">
-        <h1>Archive</h1>
+        <h1>Search the archive</h1>
     </div>
 </div>
 
 <div class="row d-flex">
     <div class="col-md-4">
-        <h2>By Date</h2>
+        <h2>By date</h2>
         <ul>
         {% for year, months in years.items %}
             <li>
@@ -24,7 +24,7 @@
         </ul>
     </div>
     <div class="col-md-4 mt-sm-3">
-        <h2>By City</h2>
+        <h2>By city</h2>
         <ul>
         {% for city in cities %}
             <li>
@@ -34,7 +34,7 @@
         </ul>
     </div>
     <div class="col-md-4 mt-sm-3">
-        <h2>By Zip code</h2>
+        <h2>By zip code</h2>
         <ul>
             {% for zip in zips %}
                 <li>
