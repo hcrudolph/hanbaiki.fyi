@@ -8,6 +8,8 @@ from .forms import UploadFilesForm
 from rapidfuzz import process, fuzz, utils
 from django.db.models import Q
 from .models import *
+from .helpers import *
+import logging
 import boto3
 
 
@@ -23,47 +25,30 @@ class ConfidenceLevelException(Exception):
     "Raised when the processes image does not clear the defined confidence threshold"
     pass
 
-def gps_dec_to_deg(dec:float):
-    result = dict()
-    result['degree'] = int(dec)
-    result['minute'] = int((dec - result['degree']) * 60)
-    result['second'] = round((((dec - result['degree']) * 60) - result['minute']) * 60, 4)
-    return result
-
-def get_confidence_by_label(bucket, photo, label) -> float:
-    session = boto3.Session(profile_name='default')
-    client = session.client('rekognition')
+def is_vending_machine(client, image):
     response = client.detect_labels(
-        Image={'S3Object':{'Bucket':bucket,'Name':photo}},
-        MaxLabels=1,
+        Image={'S3Object':{'Bucket':settings.AWS_STORAGE_BUCKET_NAME,'Name':image}},
         Features=['GENERAL_LABELS'],
-        Settings={'GeneralLabels': {'LabelInclusionFilters':[label]}},
+        Settings={'GeneralLabels': {'LabelInclusionFilters':['Vending Machine']}},
+        MinConfidence=95.,
+        MaxLabels=1,
     )
-    try:
-        result = float(response['Labels'][0]['Confidence'])
-    except:
-        result = 0.
-    return result
+    if len (response['Labels']) > 0:
+        return True
+    else:
+        return False
 
-def add_new_or_greater(old_tags, new_tags):
-    for tag, score, _ in new_tags:
-        if tag in old_tags.keys():
-            if old_tags[tag] < score:
-                old_tags[tag] = score
-        else:
-            old_tags[tag] = score
-
-def generate_tags_from_image(bucket, photo, vm):
-    session = boto3.Session(profile_name='default')
-    client = session.client('rekognition')
+def get_tags_from_image(client, image):
     existing_tags = list(Tag.objects.values_list('slug', flat=True))
-    candidate_tags = dict()
+    response = client.detect_text(
+        Image={'S3Object': {'Bucket':settings.AWS_STORAGE_BUCKET_NAME, 'Name':image}},
+        Filters={'WordFilter': {'MinConfidence': 90.0}}
+    )
+    return match_existing_tags(existing_tags, response)
 
-    # detect text, only return matches with min. confidence of 90 or higher
-    response = client.detect_text(Image={'S3Object': {'Bucket': bucket, 'Name': photo}},
-                                  Filters={'WordFilter': {'MinConfidence': 90.0}})
-
-    # fuzzy match each match of type 'word' against existing tags
+def match_existing_tags(existing_tags:list, response:dict):
+    result = dict()
+    # fuzzy match each match of type 'WORD' against existing tags
     for text in filter(lambda x : x['Type'] == 'WORD', response['TextDetections']):
         new_matches = process.extract(
             text['DetectedText'].lower(),
@@ -72,53 +57,83 @@ def generate_tags_from_image(bucket, photo, vm):
             processor=utils.default_process,
             score_cutoff=80.,
         )
-        add_new_or_greater(candidate_tags, new_matches)
+        for slug, _, _ in new_matches:
+            tag = Tag.objects.get(slug=slug)
+            result.update({slug:tag})
+    return result
 
-    # add relation for each detected tag
-    for key in candidate_tags.keys():
-        tag = Tag.objects.get(slug=key)
-        vm.tags.add(tag)
-
-def process_image(request, image):
-    vm = VendingMachine.objects.create(img=image, created_by=request.user)
-    # if save failed due to missing GPS coordinates
-    if vm.id is None:
-        logging.error('Upload failed. Image does not contain GPS data.')
-        messages.error(request, 'Upload failed. Image does not contain GPS data.')
-        raise GpsMissingException
-    else:
-        confidence = get_confidence_by_label(
-            settings.AWS_STORAGE_BUCKET_NAME,
-            f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
-            'Vending Machine'
+def create_related_models(instance, geo_info):
+    if geo_info['country'] is not None:
+        instance.country, _ = Country.objects.get_or_create(
+            name=geo_info['country']
         )
-        # only proceed with confident labels
-        if confidence > 95.:
-            try:
-                generate_tags_from_image(
-                    settings.AWS_STORAGE_BUCKET_NAME,
-                    f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
-                    vm
-                )
-            except:
-                vm.delete()
-        else:
-            logging.error(f"Upload failed. Image did not clear confidence threshold ({confidence})")
-            messages.error(request, 'Upload failed. Image does not seem to contain a vending machine.')
-            vm.delete()
-            raise ConfidenceLevelException
+    else:
+        instance.country = None
+    if geo_info['state'] is not None:
+        instance.state, _ = State.objects.get_or_create(
+            name=geo_info['state']
+        )
+    else:
+        instance.state = None
+    if geo_info['postcode'] is not None:
+        instance.zip, _ = ZipCode.objects.get_or_create(
+            code=geo_info['postcode']
+        )
+    else:
+        instance.zip = None
+    if geo_info['city'] is not None:
+        instance.city, _ = City.objects.get_or_create(
+            name=geo_info['city']
+        )
+    else:
+        instance.city = None
+    if geo_info['town'] is not None:
+        instance.town, _ = Town.objects.get_or_create(
+            name=geo_info['town']
+        )
+    else:
+        instance.town = None
+    instance.save()
+
+def create_vending_machine(client, image, user):
+    # read GPS coordinates from image
+    lat, lon = gps_from_image(image)
+    vm = VendingMachine.objects.create(
+        lat=lat,
+        lon=lon,
+        img=image,
+        created_by=user
+    )
+    # analyze image using AWS Rekognition
+    vending_machine = is_vending_machine(
+        client,
+        f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}",
+    )
+    if lat==None or lon==None or (lat==0 and lon==0):
+        logging.error('Upload failed. Image does not contain GPS coordinates.')
+        vm.delete()
+        raise GpsMissingException
+    elif not vending_machine:
+        logging.error('Upload failed. Image does not contain a Vending Machine.')
+        vm.delete()
+        raise ConfidenceLevelException
+    else:
+        geo_info = info_from_gps(lat, lon)
+        create_related_models(vm, geo_info)
+        tag_vending_machine(client, vm)
+
+def tag_vending_machine(client, vending_machine):
+    tags = get_tags_from_image(
+        client,
+        f"{settings.AWS_S3_MEDIA_LOCATION}/{vending_machine.img.name}"
+    )
+    for tag in tags.values():
+        vending_machine.tags.add(tag)
+
 
 ######################
 # View definitions   #
 ######################
-
-class PostListView(generic.ListView):
-    model = Post
-    template_name = 'photoroll/post_list.html'
-    paginate_by = 15
-
-    def get_queryset(self):
-        return Post.objects.filter(is_published=True)
 
 def about(request):
     return render(request, 'photoroll/about.html')
@@ -130,8 +145,8 @@ def post_detail(request, post_id):
     )
     context = {
         'post': post,
-        'lat_deg': gps_dec_to_deg(post.vendingmachine.lat),
-        'lon_deg': gps_dec_to_deg(post.vendingmachine.lon),
+        'lat_deg': dec_to_deg(post.vendingmachine.lat),
+        'lon_deg': dec_to_deg(post.vendingmachine.lon),
     }
     return render(request, 'photoroll/post.html', context)
 
@@ -176,6 +191,34 @@ def archive(request):
     }
     return render(request, 'photoroll/archive.html', context)
 
+def posts_by_location(request, lat:float, lon:float):
+    try:
+        lat = float(lat)
+        lon = float(lon)
+    except TypeError:
+        logging.error(f"Could not convert into float LAT:{lat} LON:{lon}.")
+
+    # search in an area of +/- 500 meters
+    max_lat = lat + 0.005
+    min_lat = lat - 0.005
+    max_lon = lon + 0.005
+    min_lon = lon - 0.005
+    posts = Post.objects.filter(
+        Q(vendingmachine__lat__gte=min_lat) & Q(vendingmachine__lat__lte=max_lat) & \
+        Q(vendingmachine__lon__gte=min_lon) & Q(vendingmachine__lon__lte=max_lon)
+    )
+    return render(request, 'photoroll/post_list_plain.html', {'posts':posts})
+
+def current_location(request):
+    return render(request, 'photoroll/current_location.html')
+
+class PostListView(generic.ListView):
+    model = Post
+    template_name = 'photoroll/post_list.html'
+    paginate_by = 15
+
+    def get_queryset(self):
+        return Post.objects.filter(is_published=True)
 
 class TagListView(generic.ListView):
     model = Tag
@@ -264,27 +307,6 @@ class PostByZipListView(generic.ListView):
             vendingmachine__zip__slug=self.kwargs['zip'],
         )
 
-def posts_by_location(request, lat:float, lon:float):
-    try:
-        lat = float(lat)
-        lon = float(lon)
-    except TypeError:
-        logging.error(f"Could not convert into float LAT:{lat} LON:{lon}.")
-
-    # search in an area of +/- 500 meters
-    max_lat = lat + 0.005
-    min_lat = lat - 0.005
-    max_lon = lon + 0.005
-    min_lon = lon - 0.005
-    posts = Post.objects.filter(
-        Q(vendingmachine__lat__gte=min_lat) & Q(vendingmachine__lat__lte=max_lat) & \
-        Q(vendingmachine__lon__gte=min_lon) & Q(vendingmachine__lon__lte=max_lon)
-    )
-    return render(request, 'photoroll/post_list_plain.html', {'posts':posts})
-
-def current_location(request):
-    return render(request, 'photoroll/current_location.html')
-
 
 ######################
 # Restricted Views   #
@@ -295,15 +317,17 @@ def upload_file(request):
     if request.method == 'POST':
         form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
+            client = boto3.Session(profile_name='default').client('rekognition')
             images = request.FILES.getlist('img')
-            image_count = 0
             for image in images:
                 try:
-                    process_image(request, image)
-                    image_count+=1
-                except (GpsMissingException, ConfidenceLevelException) as e:
-                    return HttpResponseRedirect('/')
-            messages.success(request, f"{image_count} image(s) uploaded successfully.")
+                    create_vending_machine(client, image, request.user)
+                except GpsMissingException:
+                    messages.error(request, f"Failed to upload image '{image}'. No GPS coordinates.")
+                except ConfidenceLevelException:
+                    messages.error(request, f"Failed to upload image '{image}'. No Vending Machine.")
+                else:
+                    messages.success(request, f"Successfully uploaded image '{image}'.")
             return HttpResponseRedirect('/')
     else:
         form = UploadFilesForm()

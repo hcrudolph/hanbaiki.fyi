@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+PRODUCTION = os.getenv('PRODUCTION') == 'TRUE'
 DEBUG = os.getenv('DJANGO_DEBUG') == 'TRUE'
 
 ALLOWED_HOSTS = [
@@ -211,23 +211,20 @@ AWS_CREDENTIALS = os.getenv('AWS_CREDENTIALS')
 MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN')
 
 # Email
-# Email backend
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
-## Email server config
-#DEFAULT_FROM_EMAIL = 'noreply@hanbaiki.fyi'
-#SERVER_EMAIL = 'root@hanbaiki.fyi'
-#EMAIL_HOST = <hostname>
-#EMAIL_HOST_PORT = <port>
-#EMAIL_USE_TLS = True
-#EMAIL_HOST_USER = <sender@domain.tld>
-#EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = 'noreply@hanbaiki.fyi'
+SERVER_EMAIL = 'root@hanbaiki.fyi'
 
-#ANYMAIL = {
-#    'MAILGUN_API_KEY': os.getenv('MAILGUN_ACCESS_TOKEN'),
-#    'MAILGUN_SENDER_DOMAIN': 'mg.hanbaiki.fyi',
-#}
+if PRODUCTION == 'TRUE':
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+    ANYMAIL = {
+        'MAILGUN_API_KEY': os.getenv('MAILGUN_ACCESS_TOKEN'),
+        'MAILGUN_SENDER_DOMAIN': 'mg.hanbaiki.fyi',
+    }
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Message tags
 
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
