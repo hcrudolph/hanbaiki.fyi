@@ -8,6 +8,11 @@
 </div>
 
 <div class="row mb-3">
+    <div class="col-12">
+        <p>Press the button below to search vending machines based on your current location. Your browser may prompt you for approval to allow HANBAIKI.FYI to access your location. By default, vending machines in a radius of approximately 500 meters are displayed. If you do not want to share your location, you may <a href="{% url 'archive' %}">search by zip code or city</a> instead.</p>
+    </div>
+</div>
+<div class="row mb-3">
     <div class="col-md-6 offset-lg-3">
         <button id="gpsButton" onclick="getCurrentPosition()" class="btn btn-lg btn-primary w-100">
         Search
