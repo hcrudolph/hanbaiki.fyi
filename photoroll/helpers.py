@@ -76,13 +76,12 @@ def _parse_osm(osm_info:dict):
 ######################
 
 def dec_to_deg(dec:float):
-    result = dict()
-    result['degree'] = int(dec)
-    result['minute'] = int((dec - result['degree']) * 60)
-    result['second'] = round((((dec - result['degree']) * 60) - result['minute']) * 60, 4)
-    return result
+    deg = int(dec)
+    min = int((dec - deg) * 60.)
+    sec = round((((dec - deg) * 60.) - min) * 60., 6)
+    return (deg, min, sec)
 
-def deg_to_dec(deg_min_sec:list):
+def deg_to_dec(deg_min_sec:tuple):
     deg, min, sec = deg_min_sec
     return round(float(deg + min/60. + sec/3600.), 6)
 
