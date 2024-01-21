@@ -4,6 +4,7 @@ botocore
 certifi
 cffi
 charset-normalizer
+coverage
 cryptography
 Django
 django-anymail
