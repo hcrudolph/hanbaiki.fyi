@@ -27,16 +27,17 @@ def _exif_from_image(image):
 def _send_osm_request(lat: float, lon: float, lang="en"):
     return requests.get(
         f"https://nominatim.openstreetmap.org/reverse.php?lat={lat}&lon={lon}&format=json",
-        headers={"Accept-Language":f"{lang}"}
+        headers={"Accept-Language":f"{lang}", "Referer":"https://hanbaiki.fyi"}
     ).json()
 
 def _parse_osm(osm_info:dict):
     result = dict()
+    # try to get country information
     try:
         result['country'] = osm_info['address']['country']
     except KeyError:
         result['country'] = None
-    # try to get state/county information
+    # try to get state information
     try:
         result['state'] = osm_info['address']['state']
     except KeyError:
@@ -51,7 +52,7 @@ def _parse_osm(osm_info:dict):
     except KeyError:
         result['postcode'] = None
 
-    # try to get postcode information
+    # try to get city information
     try:
         result['city'] = osm_info['address']['city']
     except KeyError:
