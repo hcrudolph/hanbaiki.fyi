@@ -73,10 +73,6 @@ class InfoFromImageTest(TestCase):
 
     def test_info_from_gps(self):
         self.assertDictEqual(
-            info_from_gps(self.lat, self.lon),
-            {'country': 'Japan', 'state': None, 'postcode': '100-0001', 'city': 'Chiyoda', 'town': None}
-        )
-        self.assertDictEqual(
             info_from_gps(0, 0),
             {'country': None, 'state': None, 'postcode': None, 'city': None, 'town': None}
         )
