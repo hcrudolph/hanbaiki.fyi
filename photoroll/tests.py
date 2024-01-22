@@ -1,7 +1,11 @@
 from django.test import TestCase
+from django.template.defaultfilters import slugify
+from django.conf import settings
+from django.core.files import File
 from .models import *
 from .views import *
 from .helpers import *
+import requests
 
 
 class SentinelUserTestCase(TestCase):
@@ -76,3 +80,66 @@ class InfoFromImageTest(TestCase):
             info_from_gps(0, 0),
             {'country': None, 'state': None, 'postcode': None, 'city': None, 'town': None}
         )
+
+class PreSaveSignalsTestCase(TestCase):
+    def setUp(self):
+        self.test_string = 'TeSt sTrInG'
+
+    def test_create_country(self):
+        c = Country.objects.create(name=self.test_string)
+        self.assertEqual(
+            c.slug,
+            slugify(self.test_string)
+        )
+
+    def test_create_state(self):
+        s = State.objects.create(name=self.test_string)
+        self.assertEqual(
+            s.slug,
+            slugify(self.test_string)
+        )
+
+    def test_create_zip(self):
+        z = ZipCode.objects.create(code=self.test_string)
+        self.assertEqual(
+            z.slug,
+            slugify(self.test_string)
+        )
+
+    def test_create_city(self):
+        c = City.objects.create(name=self.test_string)
+        self.assertEqual(
+            c.slug,
+            slugify(self.test_string)
+        )
+
+    def test_create_town(self):
+        t = Town.objects.create(name=self.test_string)
+        self.assertEqual(
+            t.slug,
+            slugify(self.test_string)
+        )
+
+    def test_create_tag(self):
+        t = Tag.objects.create(name=self.test_string)
+        self.assertEqual(
+            t.slug,
+            slugify(self.test_string)
+        )
+
+class PreDeleteSignalsTestCase(TestCase):
+    def setUp(self):
+        self.machine = VendingMachine(created_by=get_sentinel_user())
+        self.machine.img.save(
+            'test_gps_no_vm.jpg',
+            File(open('test/test_gps_no_vm.jpg', 'rb'))
+        )
+
+    def test_vm_post_delete(self):
+        img_url = f"{settings.MEDIA_URL}{self.machine.img.name}"
+        pre_delete_response = requests.head(img_url)
+        self.machine.delete()
+        post_delete_response = requests.head(img_url)
+        self.assertEqual(pre_delete_response.status_code, 200)
+        self.assertEqual(post_delete_response.status_code, 403)
+
