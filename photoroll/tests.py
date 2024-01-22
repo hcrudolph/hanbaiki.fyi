@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.template.defaultfilters import slugify
+from photoroll.templatetags.base_path import *
 from django.conf import settings
 from django.core.files import File
+from datetime import date
 from .models import *
 from .views import *
 from .helpers import *
@@ -139,3 +141,86 @@ class PreDeleteSignalsTestCase(TestCase):
         self.assertEqual(pre_delete_response.status_code, 200)
         self.assertEqual(post_delete_response.status_code, 403)
 
+class CustomTemplateTagsTestCase(TestCase):
+    def test_base_path(self):
+        path = '/posts/YYYY/MM/slug/'
+        self.assertEqual(
+            base_path(path),
+            'posts'
+        )
+
+class ModelStringTestCase(TestCase):
+    def setUp(self):
+        self.user = get_sentinel_user()
+        self.vm = VendingMachine(created_by=self.user)
+        self.vm.img.save(
+            'test_gps_no_vm.jpg',
+            File(open('test/test_gps_no_vm.jpg', 'rb'))
+        )
+        self.country = Country.objects.create(name='Test')
+        self.state = State.objects.create(name='Test')
+        self.city = City.objects.create(name='Test')
+        self.zip = ZipCode.objects.create(code='Test')
+        self.town = Town.objects.create(name='Test')
+        self.tag = Tag.objects.create(name='Test')
+
+    def test_vending_machine_str(self):
+        self.assertEqual(
+            self.vm.__str__(),
+            f"#{self.vm.id} {date.today().strftime('%Y/%m/%d')}"
+        )
+        self.assertEqual(
+            self.vm.img_tag(),
+            f"<img src='{self.vm.img.url}' height='100' />"
+        )
+
+    def test_post_str(self):
+        post = self.vm.post_set.first()
+        self.assertEqual(
+            post.img_tag(),
+            f"<img src='{self.vm.img.url}' height='100' />"
+        )
+        self.assertEqual(
+            post.__str__(),
+            f"Post #{post.id} ({date.today().strftime('%Y/%m/%d')})"
+        )
+        self.assertEqual(
+            post.str_tag(),
+            post.__str__()
+        )
+
+    def test_tag_str(self):
+        self.assertEqual(
+            self.tag.__str__(),
+            self.tag.name
+        )
+
+    def test_country_str(self):
+        self.assertEqual(
+            self.country.__str__(),
+            self.country.name
+        )
+
+    def test_state_str(self):
+        self.assertEqual(
+            self.state.__str__(),
+            self.state.name
+        )
+
+    def test_city_str(self):
+        self.assertEqual(
+            self.city.__str__(),
+            self.city.name
+        )
+
+    def test_town_str(self):
+        self.assertEqual(
+            self.town.__str__(),
+            self.town.name
+        )
+
+    def test_zip_str(self):
+        self.assertEqual(
+            self.zip.__str__(),
+            self.zip.code
+        )
