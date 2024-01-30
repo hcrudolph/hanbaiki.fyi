@@ -26,26 +26,31 @@
 <script>
     const options = {
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 3000,
         maximumAge: 0,
     };
+
+    function resetButton(){
+        document.getElementById("gpsButton").innerHTML = "Search";
+        document.getElementById("gpsButton").classList.remove("disabled");
+    }
 
     function success(pos) {
         const crd = pos.coords;
         document.getElementById("searchResults").setAttribute("hx-get", "/posts/search/location/" + crd.latitude + "/" + crd.longitude + "/");
         htmx.process(htmx.find("#searchResults"));
         htmx.trigger("#searchResults", "receiveGpsData");
-        document.getElementById("gpsButton").innerHTML = "Search";
-        document.getElementById("gpsButton").classList.remove("disabled");
+        resetButton();
     }
 
     function error(err) {
+        resetButton();
         console.warn(`ERROR(${err.code}): ${err.message}`);
     }
 
     function getCurrentPosition(err) {
         document.getElementById("gpsButton").classList.add("disabled");
-        document.getElementById("gpsButton").innerHTML = "Loading...";
+        document.getElementById("gpsButton").innerHTML = "<div class='spinner-border text-light' role='status'><span class='visually-hidden'>Loading...</span></div>";
         navigator.geolocation.getCurrentPosition(success, error, options);
     }
 </script>
