@@ -22,9 +22,11 @@
         <h3>What happens to photos uploaded to this site?</h3>
         <p>At a high level, uploaded photos are processed as follows:</p>
         <ol>
-            <li>Analysis: We read <abbr title="Exchangeable Image File Format">EXIF</abbr> data embedded  into the image by the camera to extract the <abbr title="Global Positioning System">GPS</abbr> coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
+            <li>Analysis: We read EXIF data embedded into the image by the camera to extract the GPS coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
             <li>Recognition: We use image recognition to check if uploaded files indeed contain vending machines. If the confidence score for an image lies above a certain threshold, processing continues.</li>
-            <li>Publication: Processed images are published on our site alongside its GPS coordinates and basic location information, such as state (県・都), city (区・市), postcode (〒), and town (町・村), if available.</li>
+            <li>Tagging: We use text recognition to check if uploaded files contain any known Tags (e.g., beverage brands). If the confidence score for a given tag lies above a certain threshold, the tags are automatically associated to the uploaded vending machine.</li>
+            <li>Publication: Processed images are published on our site alongside their GPS coordinates and basic location information, such as state (県・都), city (区・市), postcode (〒), and town (町・村), if available.</li>
+
         </ol>
 
         <h3>Why can I not take photos directly from the upload form?</h3>
