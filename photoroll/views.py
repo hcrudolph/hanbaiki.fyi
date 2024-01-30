@@ -3,6 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views import generic
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from datetime import datetime, timedelta
+from pytz import timezone
+from functools import wraps
 from django.conf import settings
 from .forms import UploadFilesForm
 from rapidfuzz import process, fuzz, utils
@@ -121,14 +126,38 @@ def create_vending_machine(client, image, user):
         geo_info = info_from_gps(lat, lon)
         create_related_models(vm, geo_info)
         tag_vending_machine(client, vm)
+        min_lat = round_down(lat, 4)
+        max_lat = round_up(lat, 4)
+        min_lon = round_down(lon, 4)
+        max_lon = round_up(lon, 4)
+        old_vms = VendingMachine.objects.filter(
+            Q(lat__gte=min_lat) & Q(lat__lte=max_lat) & \
+            Q(lon__gte=min_lon) & Q(lon__lte=max_lon)
+        )
+        logging.warning(old_vms)
+        duplicate = False
+        if old_vms.count() > 1:
+            duplicate = True
+        return(vm, duplicate)
 
-def tag_vending_machine(client, vending_machine):
+def tag_vending_machine(client, vm):
     tags = get_tags_from_image(
         client,
-        f"{settings.AWS_S3_MEDIA_LOCATION}/{vending_machine.img.name}"
+        f"{settings.AWS_S3_MEDIA_LOCATION}/{vm.img.name}"
     )
     for tag in tags.values():
-        vending_machine.tags.add(tag)
+        vm.tags.add(tag)
+
+def original_uploaders_only(function):
+  @wraps(function)
+  def wrap(request, id, **kwargs):
+    # redirect user unless it's the author and file was uploaded in the last minute
+    vm = VendingMachine.objects.get(id=id)
+    tz = timezone(settings.TIME_ZONE)
+    age = tz.localize(datetime.now()) - vm.date_created
+    if request.user != vm.created_by or age > timedelta(minutes=1):
+        return HttpResponseRedirect(reverse_lazy('index'))
+  return wrap
 
 
 ######################
@@ -145,8 +174,8 @@ def post_detail(request, post_id):
     )
     context = {
         'post': post,
-        'lat_deg': dec_to_deg(post.vendingmachine.lat),
-        'lon_deg': dec_to_deg(post.vendingmachine.lon),
+        'lat_deg': post.vendingmachine.lat,
+        'lon_deg': post.vendingmachine.lon,
     }
     return render(request, 'photoroll/post.html', context)
 
@@ -321,14 +350,57 @@ def upload_file(request):
             images = request.FILES.getlist('img')
             for image in images:
                 try:
-                    create_vending_machine(client, image, request.user)
+                    vm, duplicate = create_vending_machine(client, image, request.user)
                 except GpsMissingException:
                     messages.error(request, f"Failed to upload image '{image}'. No GPS coordinates.")
                 except ConfidenceLevelException:
                     messages.error(request, f"Failed to upload image '{image}'. No Vending Machine.")
+                if duplicate:
+                    messages.warning(request, f"The image '{image}' contains a potential duplicate. Please check below.")
+                    return redirect('duplicate', id=vm.id)
                 else:
                     messages.success(request, f"Successfully uploaded image '{image}'.")
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect(reverse_lazy('index'))
     else:
         form = UploadFilesForm()
     return render(request, 'photoroll/upload_file.html', {'form': form})
+
+@original_uploaders_only
+@login_required
+def duplicate(request, id):
+    # search images at the same location
+    vm = VendingMachine.objects.get(id=id)
+    min_lat = round_down(vm.lat, 4)
+    max_lat = round_up(vm.lat, 4)
+    min_lon = round_down(vm.lon, 4)
+    max_lon = round_up(vm.lon, 4)
+    old_vms = VendingMachine.objects.filter(
+        Q(lat__gte=min_lat) & Q(lat__lte=max_lat) & \
+        Q(lon__gte=min_lon) & Q(lon__lte=max_lon)
+    ).exclude(pk=id)
+    context = {
+        'new_vm': vm,
+        'old_vms': old_vms,
+    }
+    return render(request, 'photoroll/comparison.html', context)
+
+@original_uploaders_only
+@login_required
+def duplicate_yes(request, id):
+    duplicate = VendingMachine.objects.get(pk=id)
+    duplicate.delete()
+    messages.warning(request, "Skipped duplicate. Your image has been deleted.")
+    return HttpResponseRedirect(reverse_lazy('index'))
+
+@original_uploaders_only
+@login_required
+def duplicate_maybe(request, id):
+    Post.objects.filter(vendingmachine__pk=id).update(is_published=False)
+    messages.warning(request, "Your image has been uploaded and will be reviewed manually.")
+    return HttpResponseRedirect(reverse_lazy('index'))
+
+@original_uploaders_only
+@login_required
+def duplicate_no(request, id):
+    messages.success(request, "Image uploaded successfully!")
+    return HttpResponseRedirect(reverse_lazy('index'))

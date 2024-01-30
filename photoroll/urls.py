@@ -16,4 +16,8 @@ urlpatterns = [
     path('posts/search/tags/', views.TagListView.as_view(), name='tag_list'),
     path('posts/search/tags/<str:slug>/', views.PostsByTagListView.as_view(), name='posts_by_tag'),
     path('upload/file/', views.upload_file, name='upload_file'),
+    path('upload/file/duplicate/<int:id>/', views.duplicate, name='duplicate'),
+    path('upload/file/duplicate/<int:id>/yes', views.duplicate_yes, name='duplicate_yes'),
+    path('upload/file/duplicate/<int:id>/no', views.duplicate_no, name='duplicate_no'),
+    path('upload/file/duplicate/<int:id>/maybe', views.duplicate_maybe, name='duplicate_maybe'),
 ]

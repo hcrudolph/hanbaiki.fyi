@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from PIL import Image
 from PIL.ExifTags import IFD
+from math import floor, ceil
 import requests
 
 ######################
@@ -99,3 +100,11 @@ def info_from_gps(lat:float, lon:float):
 def slugify_post(fname: str) -> str:
     filename = fname.split("/")[-1]
     return filename.split(".")[0]
+
+def round_up(n, decimals=0):
+    multiplier = 10**decimals
+    return ceil(n * multiplier) / multiplier
+
+def round_down(n, decimals=0):
+    multiplier = 10**decimals
+    return floor(n * multiplier) / multiplier
