@@ -344,7 +344,7 @@ class PostByZipListView(generic.ListView):
 ######################
 
 @login_required
-def upload_file(request):
+def upload(request):
     if request.method == 'POST':
         form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
@@ -362,47 +362,47 @@ def upload_file(request):
                     return redirect('duplicate', id=vm.id)
                 else:
                     messages.success(request, f"Successfully uploaded image '{image}'.")
-            return HttpResponseRedirect(reverse_lazy('index'))
+            return redirect('index')
     else:
         form = UploadFilesForm()
-    return render(request, 'photoroll/upload_file.html', {'form': form})
+    return render(request, 'photoroll/upload.html', {'form': form})
 
-@original_uploaders_only
 @login_required
+@original_uploaders_only
 def duplicate(request, id):
     # search images at the same location
-    vm = VendingMachine.objects.get(id=id)
-    min_lat = round_down(vm.lat, 4)
-    max_lat = round_up(vm.lat, 4)
-    min_lon = round_down(vm.lon, 4)
-    max_lon = round_up(vm.lon, 4)
+    new_vm = VendingMachine.objects.get(pk=id)
+    min_lat = round_down(new_vm.lat, 4)
+    max_lat = round_up(new_vm.lat, 4)
+    min_lon = round_down(new_vm.lon, 4)
+    max_lon = round_up(new_vm.lon, 4)
     old_vms = VendingMachine.objects.filter(
         Q(lat__gte=min_lat) & Q(lat__lte=max_lat) & \
         Q(lon__gte=min_lon) & Q(lon__lte=max_lon)
     ).exclude(pk=id)
     context = {
-        'new_vm': vm,
+        'new_vm': new_vm,
         'old_vms': old_vms,
     }
     return render(request, 'photoroll/comparison.html', context)
 
-@original_uploaders_only
 @login_required
+@original_uploaders_only
 def duplicate_yes(request, id):
     duplicate = VendingMachine.objects.get(pk=id)
     duplicate.delete()
     messages.warning(request, "Skipped duplicate. Your image has been deleted.")
     return HttpResponseRedirect(reverse_lazy('index'))
 
-@original_uploaders_only
 @login_required
+@original_uploaders_only
 def duplicate_maybe(request, id):
     Post.objects.filter(vendingmachine__pk=id).update(is_published=False)
     messages.warning(request, "Your image has been uploaded and will be reviewed manually.")
     return HttpResponseRedirect(reverse_lazy('index'))
 
-@original_uploaders_only
 @login_required
+@original_uploaders_only
 def duplicate_no(request, id):
     messages.success(request, "Image uploaded successfully!")
     return HttpResponseRedirect(reverse_lazy('index'))
