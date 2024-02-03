@@ -157,6 +157,8 @@ def original_uploaders_only(function):
     age = tz.localize(datetime.now()) - vm.date_created
     if request.user != vm.created_by or age > timedelta(minutes=1):
         return HttpResponseRedirect(reverse_lazy('index'))
+    else:
+        return function(request, id, **kwargs)
   return wrap
 
 
