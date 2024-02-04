@@ -68,7 +68,8 @@ class VendingMachine(models.Model):
         blank=True,
     )
     tags = models.ManyToManyField(
-        'Tag'
+        'Tag',
+        blank=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
