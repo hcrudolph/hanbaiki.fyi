@@ -7,6 +7,7 @@ urlpatterns = [
     path('archive/', views.archive, name='archive'),
     path('archive/<int:year>/', views.PostByYearListView.as_view(), name='archive_year'),
     path('archive/<int:year>/<int:month>/', views.PostByMonthListView.as_view(), name='archive_month'),
+    path('map/', views.map, name='map'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     path('posts/<int:post_id>/map/', views.post_map, name='post_map'),
     path('posts/search/city/<str:city>/', views.PostByCityListView.as_view(), name='posts_by_city'),

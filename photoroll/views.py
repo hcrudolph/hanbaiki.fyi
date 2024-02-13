@@ -192,6 +192,20 @@ def post_map(request, post_id):
         'lon': post.vendingmachine.lon,
         'mapbox_token': settings.MAPBOX_ACCESS_TOKEN,
     }
+    return render(request, 'photoroll/post_map.html', context)
+
+def map(request):
+    vms = list(VendingMachine.objects.values_list('lat', 'lon', 'post__id'))
+    min = VendingMachine.objects.all().order_by('lon').first()
+    max = VendingMachine.objects.all().order_by('-lon').first()
+    context = {
+        'min_lon': min.lon,
+        'min_lat': min.lat,
+        'max_lon': max.lon,
+        'max_lat': max.lat,
+        'vending_machines': vms,
+        'mapbox_token': settings.MAPBOX_ACCESS_TOKEN,
+    }
     return render(request, 'photoroll/map.html', context)
 
 def archive(request):

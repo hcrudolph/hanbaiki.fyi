@@ -1,37 +1,51 @@
 {% extends "photoroll/base.html" %}
 
+{% block customcss %}
+<style>
+.mapboxgl-marker {
+    cursor: pointer;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'post_detail' id %}">Post</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Map</li>
-            </ol>
-          </nav>
-    </div>
-</div>
+
 <div class="row d-flex min-vh-100">
     <div class="col flex-fill">
         <div id="map" class="h-75 w-100"></div>
     </div>
 </div>
+
 {% endblock content %}
 
 {% block customjs %}
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+{{ vending_machines|json_script:"vending_machines" }}
 <script>
     mapboxgl.accessToken = '{{ mapbox_token }}';
+    const vending_machines = JSON.parse(document.getElementById('vending_machines').textContent);
     const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v12',
-    center: ["{{ lon }}", "{{ lat }}"],
-    zoom: 15
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: ['{{min_lon}}','{{min_lat}}'],
+        zoom: 13
     });
 
-    const marker1 = new mapboxgl.Marker()
-    .setLngLat(["{{ lon }}", "{{ lat }}"])
-    .addTo(map);
+    // create markers for each vending machine
+    vending_machines.forEach(element => {
+        var marker = new mapboxgl.Marker()
+        .setLngLat([element[1], element[0]])
+        .addTo(map);
+        marker.getElement().addEventListener('click', event => {
+            window.location.href = '/posts/' + element[2];
+        });
+    });
+
+    // zoom map view based on min/max coordinates
+    const ne = new mapboxgl.LngLat('{{min_lon}}', '{{min_lat}}');
+    const sw = new mapboxgl.LngLat('{{max_lon}}', '{{max_lat}}');
+    const bounds = new mapboxgl.LngLatBounds(sw, ne);
+    map.fitBounds(bounds, {
+        padding: 100
+    });
 </script>
 {% endblock customjs %}

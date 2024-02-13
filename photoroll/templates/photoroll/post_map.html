@@ -1,0 +1,37 @@
+{% extends "photoroll/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'post_detail' id %}">Post</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Map</li>
+            </ol>
+          </nav>
+    </div>
+</div>
+<div class="row d-flex min-vh-100">
+    <div class="col flex-fill">
+        <div id="map" class="h-75 w-100"></div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block customjs %}
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+<script>
+    mapboxgl.accessToken = '{{ mapbox_token }}';
+    const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: ["{{ lon }}", "{{ lat }}"],
+    zoom: 15
+    });
+
+    const marker1 = new mapboxgl.Marker()
+    .setLngLat(["{{ lon }}", "{{ lat }}"])
+    .addTo(map);
+</script>
+{% endblock customjs %}
