@@ -4,7 +4,7 @@
 
 <div class="row d-flex">
     <div class="col-12">
-        <h1>About</h1>
+        <h1>About this site</h1>
     </div>
 </div>
 
@@ -16,10 +16,10 @@
         <hr class="my-5"/>
 
         <h2>FAQ</h2>
-        <h3>How can I upload new photos?</h3>
+        <h3 id="upload">How can I upload new photos?</h3>
         <p>To contribute photos, please <a href="{% url 'signup' %}">create an account</a> first. Once you are logged in, you will see an Upload button in the navigation bar.</p>
 
-        <h3>What happens to photos uploaded to this site?</h3>
+        <h3 id="processing">What happens to photos uploaded to this site?</h3>
         <p>At a high level, uploaded photos are processed as follows:</p>
         <ol>
             <li>Analysis: We read EXIF data embedded into the image by the camera to extract the GPS coordinates of the subject. If those GPS coordinates could be read successfully, processing continues.</li>
@@ -29,13 +29,13 @@
 
         </ol>
 
-        <h3>Why can I not take photos directly from the upload form?</h3>
+        <h3 id="exif">Why can I not take photos directly from the upload form?</h3>
         <p>This site relies on the EXIF data embedded within the uploaded files to determine a photo's location. Unfortunately, the default camera dialog on iOS and Android -unless accessed directly via your camera app- does not embed GPS coordinates. Therefore, it is only possible for us to process photos that are already taken and saved, for example, in your gallery.</p>
 
-        <h3>Why should I trust this site?</h3>
+        <h3 id="source">Why should I trust this site?</h3>
         <p>Luckily, you don't have to. The entire source code is open-source and available on <a href="https://github.com/hcrudolph/hanbaiki.fyi" target="_blank">GitHub</a>.</p>
 
-        <h3>I found a bug! What should I do now?</h3>
+        <h3 id="issues">I found a bug! What should I do now?</h3>
         <p>Please take the time to file an issue on <a href="https://github.com/hcrudolph/hanbaiki.fyi/issues" target="_blank">GitHub</a>.</p>
     </div>
 </div>
