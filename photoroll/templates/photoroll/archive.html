@@ -8,40 +8,42 @@
 </div>
 
 <div class="row d-flex">
-    <div class="col-md-4">
-        <h2>By date</h2>
-        <ul>
-        {% for year, months in years.items %}
-            <li>
-                <a href="{% url 'archive_year' year %}">{{ year }}</a>
-                <ul>
-                    {% for month in months %}
-                    <li><a href="{% url 'archive_month' year month %}">{{ year }}/{{ month }}</a></li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
     <div class="col-md-4 mt-sm-3">
         <h2>By city</h2>
-        <ul>
-        {% for city in cities %}
-            <li>
+        <ul class="list-group">
+            {% for city in cities %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a href="{% url 'posts_by_city' city.slug %}">{{ city }}</a>
+                <span class="badge bg-primary rounded-pill">{{ city.vendingmachine_set.count }}</span>
             </li>
-        {% endfor %}
+            {% endfor %}
         </ul>
     </div>
     <div class="col-md-4 mt-sm-3">
         <h2>By zip code</h2>
-        <ul>
+        <ul class="list-group">
             {% for zip in zips %}
-                <li>
-                    <a href="{% url 'posts_by_zip' zip.slug %}">{{ zip }}</a>
-                </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'posts_by_zip' zip.slug %}">{{ zip }}</a>
+                <span class="badge bg-primary rounded-pill">{{ zip.vendingmachine_set.count }}</span>
+            </li>
             {% endfor %}
-            </ul>
+        </ul>
+    </div>
+    <div class="col-md-4 mt-sm-3">
+        <h2>By date</h2>
+        <ul class="list-group">
+        {% for year, months in years.items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a class="fw-bold" href="{% url 'archive_year' year %}">{{ year }}</a>
+            </li>
+            {% for month in months %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'archive_month' year month %}">{{ year }}/{{ month }}</a>
+            </li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
     </div>
 </div>
 

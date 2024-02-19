@@ -270,7 +270,9 @@ class TagListView(generic.ListView):
     template_name = 'photoroll/tag_list.html'
 
     def get_queryset(self):
-        return Tag.objects.exclude(vendingmachine__post=None)
+        tags = Tag.objects.exclude(vendingmachine__post=None)
+        half = round_up(tags.count()/2)
+        return [tags[:half], tags[half:]]
 
 class PostsByTagListView(generic.ListView):
     model = Post

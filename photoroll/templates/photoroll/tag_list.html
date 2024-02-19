@@ -8,14 +8,25 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <ul>
-        {% for tag in object_list %}
-            <li><a href="{% url 'posts_by_tag' tag.slug %}">{{ tag.name }}</a></li>
-        {% empty %}
-            <li>No tags yet.</li>
-        {% endfor %}
+    {% for tag_group in object_list %}
+    <div class="col-lg-6 mt-sm-3">
+        <ul class="list-group">
+            {% for tag in tag_group %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'posts_by_tag' tag.slug %}">{{ tag.name }}</a>
+                <span class="badge bg-primary rounded-pill">{{ tag.vendingmachine_set.count }}</span>
+            </li>
+            {% endfor %}
         </ul>
     </div>
+    {% empty %}
+    <div class="col-lg mt-sm-3">
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                No tags yet.
+            </li>
+        </ul>
+    </div>
+    {% endfor %}
 </div>
 {% endblock content %}
