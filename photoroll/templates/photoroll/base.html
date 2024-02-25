@@ -27,48 +27,122 @@
                 <ul class="pagination pagination-lg">
                 <!-- First and previous links -->
                 {% if page_obj.has_previous %}
-                <li class="page-item first">
-                    <a class="page-link" href="{{ request.path }}?page=1">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a></li>
-                    <li class="page-item previous">
+                    {% if page_obj.previous_page_number == 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page=1">
+                            <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
+                        </a>
+                    </li>
+                    {% elif page_obj.previous_page_number == 2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page=1">
+                            <span aria-hidden="true">1</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
                         <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
-                        <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
-                    </a></li>
-                {% else %}
-                    <li class="page-item first disabled">
+                            <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
+                        </a>
+                    </li>
+                    {% elif page_obj.previous_page_number == page_obj.paginator.num_pages|add:'-1' %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page=1">
+                            <span aria-hidden="true">1</span>
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
                         <a class="page-link" href="#">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a></li>
-                    <li class="page-item previous disabled">
-                        <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&lsaquo;</span>
-                    </a></li>
+                            <span aria-hidden="true">...</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number|add:'-1' }}">
+                            <span aria-hidden="true">{{ page_obj.previous_page_number|add:'-1' }}</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
+                            <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page=1">
+                            <span aria-hidden="true">1</span>
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">
+                            <span aria-hidden="true">...</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}">
+                            <span aria-hidden="true">{{ page_obj.previous_page_number }}</span>
+                        </a>
+                    </li>
+                    {% endif %}
                 {% endif %}
-
                 <li class="page-item active">
-                    <a class="page-link" href="#">{{ page_obj.number }}</a>
+                    <a class="page-link" href="">{{ page_obj.number }}</a>
                 </li>
-
                 <!-- Next and last links -->
                 {% if page_obj.has_next %}
-                    <li class="page-item next">
-                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
-                        <span aria-hidden="true">{{ page_obj.next_page_number }}</span>
-                    </a></li>
-                    <li class="page-item last">
-                        <a class="page-link" href="{{ request.path }}?page={{ page_obj.paginator.num_pages }}">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a></li>
-                {% else %}
-                    <li class="page-item next disabled">
-                        <a class="page-link" href="#">
-                        <span aria-hidden="true">&rsaquo;</span>
-                    </a></li>
-                    <li class="page-item last disabled">
-                        <a class="page-link" href="#">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a></li>
+                    {% if page_obj.next_page_number == page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                                <span aria-hidden="true">{{ page_obj.next_page_number }}</span>
+                            </a>
+                        </li>
+                    {% elif page_obj.next_page_number == page_obj.paginator.num_pages|add:'-1' %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                                <span aria-hidden="true">{{ page_obj.next_page_number }}</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.paginator.num_pages }}">
+                                <span aria-hidden="true">{{ page_obj.paginator.num_pages }}</span>
+                            </a>
+                        </li>
+                    {% elif page_obj.next_page_number == 2 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page=2">
+                                <span aria-hidden="true">2</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page=3">
+                                <span aria-hidden="true">3</span>
+                            </a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">
+                                <span aria-hidden="true">...</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.paginator.num_pages }}">
+                                <span aria-hidden="true">{{ page_obj.paginator.num_pages }}</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}">
+                                <span aria-hidden="true">{{ page_obj.next_page_number }}</span>
+                            </a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">
+                                <span aria-hidden="true">...</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{ request.path }}?page={{ page_obj.paginator.num_pages }}">
+                                <span aria-hidden="true">{{ page_obj.paginator.num_pages }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
 
                 </ul>
